@@ -1,5 +1,5 @@
 import re
-import timeit
+
 
 # why dict:
 # in case more mappings r added,
