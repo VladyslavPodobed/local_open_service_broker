@@ -3,12 +3,23 @@ import re
 
 # why dict:
 # in case more mappings r added,
-dictionary_with_mappings: dict[str, bool] = {
-    "postgresql_needed": False,
-    "mysql_needed": False,
-    "redis_needed": False,
-    "nginx_needed": False
+dictionary_with_mappings: dict[str, int] = {
+    "postgresql": 1,
+    "mysql": 2,
+    "redis": 3,
+    "nginx": 4
 }
+selected_services: list[str] = []
+offered_services = """
+Select the number of the respective service/s that you need:
+    [1] - PostgreSQL
+    [2] - MySQL
+    [3] - Redis
+    [4] - Nginx
+e.g.
+    if u need PostgreSQL - $: 1
+    if u need PostgreSQL and MySQL - $: 1 2
+"""
 
 
 # the function is used in user_selects_services; it exists so that I can jsut add any number of services to the "offered_services" var
@@ -39,23 +50,23 @@ def user_selects_services():
         except ValueError:
             continue
 
-    return print(selected_services_set)
+    return selected_services_set
 
 
-offered_services = """
-Select the number of the respective service/s that you need:
-    [1] - PostgreSQL
-    [2] - MySQL
-    [3] - Redis
-    [4] - Nginx
-e.g.
-    if u need PostgreSQL - $: 1
-    if u need PostgreSQL and MySQL - $: 1 2
-"""
+def determine_selected_services(user_response: set[int], dictionary_with_mappings: dict[str, int]) -> list[str]:
+    global selected_services
+
+    for key_in_dict in dictionary_with_mappings:
+        for int_in_set in user_response:
+            if int_in_set == dictionary_with_mappings.get(key_in_dict):
+                selected_services.append(key_in_dict)
+
+    return selected_services
 
 
 def main():
-    user_selects_services()
+    global dictionary_with_mappings
+    determine_selected_services(user_selects_services(), dictionary_with_mappings)
 
 
 print(offered_services)
