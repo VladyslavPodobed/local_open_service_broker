@@ -64,10 +64,27 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
     return selected_services
 
 
+# to do:
+# dict[str, dict]
+# str - key representing a service
+# inner dict - will contain all config for the respective key
+def user_inputs_config():
+    ENV_DB_PASSWORD = input("""
+Input db's password:
+""")
+
+
+# how to write into file:
+# with open("docker-compose.yml", "w") as random_file:
+#     file.write(sth)
+
+
 def main():
     global dictionary_with_mappings
     determine_selected_services(user_selects_services(), dictionary_with_mappings)
 
 
-print(offered_services)
-main()
+# print(offered_services)
+# main()
+
+
