@@ -64,14 +64,36 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
     return selected_services
 
 
+def int_input_validation(variable_being_wrapped):
+    try:
+        var_is_of_correct_type_int = int(variable_being_wrapped)
+        return print("got the result")
+    except:
+        print('not a number')
+        
+
+
+sth = input("input a number")
+int_input_validation(sth) 
+
+
+
 # to do:
-# dict[str, dict]
-# str - key representing a service
-# inner dict - will contain all config for the respective key
-def user_inputs_config():
-    ENV_DB_PASSWORD = input("""
-Input db's password:
-""")
+# need a wrapper for input validation
+def user_inputs_config() -> dict:
+    PORT_HOST = input("Input port that should be open on the host: ")
+    POST_CONTAINER = input("Input port that should be open on the container: ")
+    ENV_DB_PASSWORD = input("Input db's password: ")
+
+    dict_with_config = {}
+    dict_with_config.update({
+        "PORT_HOST": PORT_HOST,
+        "POST_CONTAINER": POST_CONTAINER,
+        "ENV_DB_PASSWORD": ENV_DB_PASSWORD
+    })
+
+    return dict_with_config
+
 
 
 # how to write into file:
