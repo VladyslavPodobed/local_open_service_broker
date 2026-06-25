@@ -1,4 +1,5 @@
 import re
+from retry import retry
 
 
 # why dict:
@@ -64,27 +65,29 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
     return selected_services
 
 
-def int_input_validation(variable_being_wrapped):
-    try:
-        var_is_of_correct_type_int = int(variable_being_wrapped)
-        return print("got the result")
-    except:
-        print('not a number')
-        
+list_of_config_questions = [
+    "Input port that should be open on the host: ",
+    "Input port that should be open on the container: ",
+    "Input db's password: "
+]
 
 
-sth = input("input a number")
-int_input_validation(sth) 
-
+@retry()
+def convert_str_to_int(string_being_converted):
+    var_of_correct_type_int = int(string_being_converted)
+    if type(var_of_correct_type_int) is not int:
+        print('ssdaddsadsasdasdasddas')
 
 
 # to do:
 # need a wrapper for input validation
-def user_inputs_config() -> dict:
-    PORT_HOST = input("Input port that should be open on the host: ")
-    POST_CONTAINER = input("Input port that should be open on the container: ")
-    ENV_DB_PASSWORD = input("Input db's password: ")
+def user_inputs_config(list_being_iterated_over: list) -> dict:
 
+    for question in list_being_iterated_over:
+        var_of_type_int = input(question)
+        var_of_type_int = convert_str_to_int(var_of_type_int)
+        print(type(var_of_type_int))
+    
     dict_with_config = {}
     dict_with_config.update({
         "PORT_HOST": PORT_HOST,
@@ -94,7 +97,7 @@ def user_inputs_config() -> dict:
 
     return dict_with_config
 
-
+user_inputs_config(list_of_config_questions)
 
 # how to write into file:
 # with open("docker-compose.yml", "w") as random_file:
