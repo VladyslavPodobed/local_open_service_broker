@@ -21,6 +21,11 @@ e.g.
     if u need PostgreSQL - $: 1
     if u need PostgreSQL and MySQL - $: 1 2
 """
+list_of_config_questions = [
+    "Input port that should be open on the host: ",
+    "Input port that should be open on the container: ",
+    "Input db's password: "
+]
 
 
 # the function is used in user_selects_services; it exists so that I can jsut add any number of services to the "offered_services" var
@@ -38,7 +43,7 @@ def determine_amount_of_offered_services(str_to_check):
     return number_without_brackets
 
 
-def user_selects_services():
+def user_selects_services() -> set[int]:
     selected_services_str = input()
     selected_services_list = re.sub(r"a-z[,.!+|\-=/?:;\'\\]", "", selected_services_str).split(" ")
     selected_services_set = set()
@@ -60,16 +65,11 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
     for key_in_dict in dictionary_with_mappings:
         for int_in_set in user_response:
             if int_in_set == dictionary_with_mappings.get(key_in_dict):
+                print(f"determine_selected_services returned: --- {key_in_dict}")
                 selected_services.append(key_in_dict)
 
     return selected_services
-
-
-list_of_config_questions = [
-    "Input port that should be open on the host: ",
-    "Input port that should be open on the container: ",
-    "Input db's password: "
-]
+# I get a list containing names of selected services <- why do I need it?
 
 
 @retry()
@@ -78,11 +78,10 @@ def convert_str_to_int(string_being_converted):
     if type(var_of_correct_type_int) is not int:
         print('ssdaddsadsasdasdasddas')
 
+    return var_of_correct_type_int
 
-# to do:
-# need a wrapper for input validation
+
 def user_inputs_config(list_being_iterated_over: list) -> dict:
-
     for question in list_being_iterated_over:
         var_of_type_int = input(question)
         var_of_type_int = convert_str_to_int(var_of_type_int)
@@ -97,19 +96,17 @@ def user_inputs_config(list_being_iterated_over: list) -> dict:
 
     return dict_with_config
 
-user_inputs_config(list_of_config_questions)
+# user_inputs_config(list_of_config_questions)
 
-# how to write into file:
-# with open("docker-compose.yml", "w") as random_file:
-#     file.write(sth)
 
 
 def main():
     global dictionary_with_mappings
     determine_selected_services(user_selects_services(), dictionary_with_mappings)
+    
 
 
 # print(offered_services)
-# main()
+main()
 
 
