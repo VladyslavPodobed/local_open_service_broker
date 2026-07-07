@@ -72,29 +72,40 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
 # I get a list containing names of selected services <- why do I need it?
 
 
-def convert_str_to_int(key_from_dict: str) -> int:
+def convert_str_to_int(string_being_converted) -> int:
     while True:
-        string_being_converted = input(key_from_dict)
+        # that's an issue
+        # I already have input function in user_inputs_config
+        # if this duplicate is removed however,
+        # the except statement keeps happening
+        string_being_converted = input("")
         try:
             var_of_correct_type_int = int(string_being_converted)
             print(type(var_of_correct_type_int))
 
             return var_of_correct_type_int
         except ValueError:
-            print("The value must be just numbers (e.g. 1162)")
+            print("The value must contain just numbers (e.g. 1162)")
 
-    
-# def user_inputs_config() -> dict:
-    
+
+def user_inputs_config(dict_of_config_question):
+    for question in dict_of_config_question:
+        print(question)
+        prompt_to_input_config = input("")
+        if bool(dict_of_config_question[question]):
+            print(prompt_to_input_config)
+            convert_str_to_int(prompt_to_input_config)
+        if type(convert_str_to_int(prompt_to_input_config)) is int:
+            continue
 
 
 def main():
     global dictionary_with_mappings
     determine_selected_services(user_selects_services(), dictionary_with_mappings)
-    # user_inputs_config()
+    user_inputs_config(dict_with_config_questions)
 
 
-# print(offered_services)
-# main()
+print(offered_services)
+main()
 
 
