@@ -72,7 +72,7 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
 # I get a list containing names of selected services <- why do I need it?
 
 
-def convert_str_to_int(key_from_dict):
+def convert_str_to_int(key_from_dict: str) -> int:
     while True:
         string_being_converted = input(key_from_dict)
         try:
