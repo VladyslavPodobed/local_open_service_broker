@@ -1,6 +1,4 @@
 import re
-from retry import retry
-
 
 # why dict:
 # in case more mappings r added,
@@ -21,11 +19,13 @@ e.g.
     if u need PostgreSQL - $: 1
     if u need PostgreSQL and MySQL - $: 1 2
 """
-dictinonary_with_config_questions: dict[str, bool] = {
+dict_with_config_questions: dict[str, bool] = {
+    # True is for inputs that must be int - done by the convert_str_to_int function and checked by the convert_str_to_int fucntion
     "Input port that should be open on the host: ": True,
     "Input port that should be open on the container: ": True, 
     "Input db's password: ": False
 }
+dict_containing_selected_services_and_config: dict = {}
 
 
 # the function is used in user_selects_services; it exists so that I can jsut add any number of services to the "offered_services" var
@@ -72,49 +72,29 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
 # I get a list containing names of selected services <- why do I need it?
 
 
-@retry()
-def convert_str_to_int(string_being_converted):
-    var_of_correct_type_int = 0
+def convert_str_to_int(key_from_dict):
+    while True:
+        string_being_converted = input(key_from_dict)
+        try:
+            var_of_correct_type_int = int(string_being_converted)
+            print(type(var_of_correct_type_int))
 
-    try:
-        var_of_correct_type_int = int(string_being_converted)
+            return var_of_correct_type_int
+        except ValueError:
+            print("The value must be just numbers (e.g. 1162)")
 
-        return var_of_correct_type_int
-
-    except ValueError:
-        if type(var_of_correct_type_int) is not int:
-            print('ssdaddsadsasdasdasddas')
-
-
-
-def user_inputs_config() -> dict:
-    # for question in dict_being_iterated_over:
-    #     var_of_type_int = input(question)
-    #     var_of_type_int = convert_str_to_int(var_of_type_int)
-    #     print(type(var_of_type_int))
-    PORT_HOST = input("input port host")
-    print(PORT_HOST)
-    dict_with_config = {}
-    dict_with_config.update({
-        "PORT_HOST": PORT_HOST
-        # "POST_CONTAINER": POST_CONTAINER,
-        # "ENV_DB_PASSWORD": ENV_DB_PASSWORD
-    })
-    test = type(dict_with_config["PORT_HOST"])
-    print(test)
-
-    return dict_with_config["PORT_HOST"]
-
-# user_inputs_config(dictinonary_with_config_questions)
+    
+# def user_inputs_config() -> dict:
+    
 
 
 def main():
     global dictionary_with_mappings
     determine_selected_services(user_selects_services(), dictionary_with_mappings)
-    user_inputs_config()
+    # user_inputs_config()
 
 
 # print(offered_services)
-main()
+# main()
 
 
