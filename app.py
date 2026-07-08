@@ -84,12 +84,22 @@ def convert_str_to_int(string_being_converted, question_being_asked) -> int:
 
 
 def user_inputs_config(dict_of_config_question):
-    for question in dict_of_config_question:
+    dict_containing_config: dict = {
+        "HOST_PORT": "",
+        "CONTAINER_PORT": "",
+        "DB_PASSWORD": ""
+    }
+
+    for (question, key_in_final_dict) in zip(dict_of_config_question, dict_containing_config):
         print(question)
         prompt_to_input_config = input("")
         if bool(dict_of_config_question[question]):
-            print(prompt_to_input_config)
-            convert_str_to_int(prompt_to_input_config, question)
+            prompt_to_input_config = convert_str_to_int(prompt_to_input_config, question)
+
+        dict_containing_config[key_in_final_dict] = prompt_to_input_config
+
+    return dict_containing_config
+
 
 
 def main():
