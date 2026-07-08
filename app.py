@@ -44,7 +44,7 @@ def determine_amount_of_offered_services(str_to_check: str):
     return number_without_brackets
 
 
-def user_selects_services() -> set[int]:
+def user_selects_services() -> list[int]:
     selected_services_str = input()
     selected_services_list = re.sub(r"a-z[,.!+|\-=/?:;\'\\]", "", selected_services_str).split(" ")
     selected_services_set = set()
@@ -55,8 +55,10 @@ def user_selects_services() -> set[int]:
                 selected_services_set.add(i)
         except ValueError:
             continue
-
-    return selected_services_set
+    selected_services_list = list(selected_services_set)
+    for a in selected_services_list:
+        print(type(a))
+    return selected_services_list
 
 
 def determine_selected_services(user_response: set[int], dictionary_with_mappings: dict[str, int]) -> list[str]:
@@ -97,13 +99,8 @@ def prompt_to_input_config_for_one_service(dict_of_config_question: dict[str, bo
     return dict_with_config
 
 
-# def prompt_to_input_config_for_each_service(set_with_numbers_representing_selected_services: set[int]):
-    # user_selects_services - that returns a list of ints
-    # where the last int represent the # corresponding to the last service
-    # e.g. int 5 = service 5
-    # i = 0
-    # while i != set_with_numbers_representing_selected_services[-1]:
-        # print(i)
+# def ssth()
+
 
 
 def main():
