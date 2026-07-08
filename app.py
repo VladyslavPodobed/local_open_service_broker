@@ -1,4 +1,5 @@
 import re
+from typing import Any
 
 # why dict:
 # in case more mappings r added,
@@ -25,13 +26,13 @@ dict_with_config_questions: dict[str, bool] = {
     "Input port that should be open on the container: ": True, 
     "Input db's password: ": False
 }
-dict_containing_selected_services_and_config: dict = {}
+dict_with_selected_services_and_config: dict[str, Any] = {}
 
 
 # the function is used in user_selects_services; it exists so that I can jsut add any number of services to the "offered_services" var
 # knowing that the max number that will be accepted from user's input is not greater than the number belonging to the last service
 # e.g. last service is Apache and has the number [100], if user input "101", that specific number will be ignored as there's no service with corresponding number
-def determine_amount_of_offered_services(str_to_check):
+def determine_amount_of_offered_services(str_to_check: str):
     # "r" in the findall function declares RegEx patterns as raw string
     number_with_brackets = re.findall(r"\[.+\]", str_to_check)
     number_without_brackets: list = []
@@ -47,7 +48,6 @@ def user_selects_services() -> set[int]:
     selected_services_str = input()
     selected_services_list = re.sub(r"a-z[,.!+|\-=/?:;\'\\]", "", selected_services_str).split(" ")
     selected_services_set = set()
-
     for i in selected_services_list:
         try:
             i = int(i)
@@ -61,7 +61,6 @@ def user_selects_services() -> set[int]:
 
 def determine_selected_services(user_response: set[int], dictionary_with_mappings: dict[str, int]) -> list[str]:
     global selected_services
-
     for key_in_dict in dictionary_with_mappings:
         for int_in_set in user_response:
             if int_in_set == dictionary_with_mappings.get(key_in_dict):
@@ -72,43 +71,48 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
 # I get a list containing names of selected services <- why?
 
 
-def convert_str_to_int(string_being_converted, question_being_asked) -> int:
+def convert_str_to_int(string_being_converted: str, question_being_asked: str) -> int:
     while True:
         try:
 
             return int(string_being_converted)
-
         except ValueError:
             print("The value must contain just numbers (e.g. 1162)")
             string_being_converted = input(question_being_asked)
 
 
-def user_inputs_config(dict_of_config_question):
-    dict_containing_config: dict = {
+def prompt_to_input_config_for_one_service(dict_of_config_question: dict[str, bool]) -> dict[str, Any]:
+    dict_with_config: dict[str, Any] = {
         "HOST_PORT": "",
         "CONTAINER_PORT": "",
         "DB_PASSWORD": ""
     }
-
-    for (question, key_in_final_dict) in zip(dict_of_config_question, dict_containing_config):
+    for (question, key_in_final_dict) in zip(dict_of_config_question, dict_with_config):
         print(question)
         prompt_to_input_config = input("")
         if bool(dict_of_config_question[question]):
             prompt_to_input_config = convert_str_to_int(prompt_to_input_config, question)
+        dict_with_config[key_in_final_dict] = prompt_to_input_config
 
-        dict_containing_config[key_in_final_dict] = prompt_to_input_config
+    return dict_with_config
 
-    return dict_containing_config
 
+# def prompt_to_input_config_for_each_service(set_with_numbers_representing_selected_services: set[int]):
+    # user_selects_services - that returns a list of ints
+    # where the last int represent the # corresponding to the last service
+    # e.g. int 5 = service 5
+    # i = 0
+    # while i != set_with_numbers_representing_selected_services[-1]:
+        # print(i)
 
 
 def main():
     global dictionary_with_mappings
-    determine_selected_services(user_selects_services(), dictionary_with_mappings)
-    user_inputs_config(dict_with_config_questions)
+    global dict_with_config_questions
+    user_selects_services()
+    prompt_to_input_config_for_one_service(dict_with_config_questions)
 
 
 print(offered_services)
 main()
-
 
