@@ -69,23 +69,18 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
                 selected_services.append(key_in_dict)
 
     return selected_services
-# I get a list containing names of selected services <- why do I need it?
+# I get a list containing names of selected services <- why?
 
 
-def convert_str_to_int(string_being_converted) -> int:
+def convert_str_to_int(string_being_converted, question_being_asked) -> int:
     while True:
-        # that's an issue
-        # I already have input function in user_inputs_config
-        # if this duplicate is removed however,
-        # the except statement keeps happening
-        string_being_converted = input("")
         try:
-            var_of_correct_type_int = int(string_being_converted)
-            print(type(var_of_correct_type_int))
 
-            return var_of_correct_type_int
+            return int(string_being_converted)
+
         except ValueError:
             print("The value must contain just numbers (e.g. 1162)")
+            string_being_converted = input(question_being_asked)
 
 
 def user_inputs_config(dict_of_config_question):
@@ -94,9 +89,7 @@ def user_inputs_config(dict_of_config_question):
         prompt_to_input_config = input("")
         if bool(dict_of_config_question[question]):
             print(prompt_to_input_config)
-            convert_str_to_int(prompt_to_input_config)
-        if type(convert_str_to_int(prompt_to_input_config)) is int:
-            continue
+            convert_str_to_int(prompt_to_input_config, question)
 
 
 def main():
