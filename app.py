@@ -26,13 +26,13 @@ dict_with_config_questions: dict[str, bool] = {
     "Input port that should be open on the container: ": True, 
     "Input db's password: ": False
 }
-dict_with_selected_services_and_config: dict[str, Any] = {}
+dict_with_selected_services_and_config: dict[str, dict[str, Any]] = {}
 
 
 # the function is used in user_selects_services; it exists so that I can jsut add any number of services to the "offered_services" var
 # knowing that the max number that will be accepted from user's input is not greater than the number belonging to the last service
 # e.g. last service is Apache and has the number [100], if user input "101", that specific number will be ignored as there's no service with corresponding number
-def determine_amount_of_offered_services(str_to_check: str):
+def count_number_of_offered_services(str_to_check: str) -> list[int]:
     # "r" in the findall function declares RegEx patterns as raw string
     number_with_brackets = re.findall(r"\[.+\]", str_to_check)
     number_without_brackets: list = []
@@ -51,17 +51,16 @@ def user_selects_services() -> list[int]:
     for i in selected_services_list:
         try:
             i = int(i)
-            if i <= determine_amount_of_offered_services(offered_services)[-1]:
+            if i <= count_number_of_offered_services(offered_services)[-1]:
                 selected_services_set.add(i)
         except ValueError:
             continue
     selected_services_list = list(selected_services_set)
-    for a in selected_services_list:
-        print(type(a))
+
     return selected_services_list
 
 
-def determine_selected_services(user_response: set[int], dictionary_with_mappings: dict[str, int]) -> list[str]:
+def determine_selected_services(user_response: list[int], dictionary_with_mappings: dict[str, int]) -> list[str]:
     global selected_services
     for key_in_dict in dictionary_with_mappings:
         for int_in_set in user_response:
@@ -70,7 +69,6 @@ def determine_selected_services(user_response: set[int], dictionary_with_mapping
                 selected_services.append(key_in_dict)
 
     return selected_services
-# I get a list containing names of selected services <- why?
 
 
 def convert_str_to_int(string_being_converted: str, question_being_asked: str) -> int:
@@ -83,7 +81,7 @@ def convert_str_to_int(string_being_converted: str, question_being_asked: str) -
             string_being_converted = input(question_being_asked)
 
 
-def prompt_to_input_config_for_one_service(dict_of_config_question: dict[str, bool]) -> dict[str, Any]:
+def prompt_for_service_config(dict_of_config_question: dict[str, bool]) -> dict[str, Any]:
     dict_with_config: dict[str, Any] = {
         "HOST_PORT": "",
         "CONTAINER_PORT": "",
@@ -99,15 +97,20 @@ def prompt_to_input_config_for_one_service(dict_of_config_question: dict[str, bo
     return dict_with_config
 
 
-# def ssth()
-
+def map_services_to_configs(services: list[str]) -> dict[str, dict[str, Any]]:
+    global dict_with_config_questions
+    global dict_with_selected_services_and_config
+    for each_service in services:
+        dict_with_selected_services_and_config[each_service] = prompt_for_service_config(dict_with_config_questions)
+        print(f"{each_service}     -------------         {dict_with_selected_services_and_config[each_service]}")
+    return dict_with_selected_services_and_config
 
 
 def main():
     global dictionary_with_mappings
     global dict_with_config_questions
-    user_selects_services()
-    prompt_to_input_config_for_one_service(dict_with_config_questions)
+    sssth = determine_selected_services(user_selects_services(), dictionary_with_mappings)
+    map_services_to_configs(sssth)
 
 
 print(offered_services)
