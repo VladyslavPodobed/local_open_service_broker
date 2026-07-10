@@ -82,25 +82,26 @@ class UserInput:
                 string_being_converted = input(question_being_asked)
 
 
-    def prompt_for_service_config(self, config_questions: dict[str, bool]) -> dict[str, Any]:
+    def prompt_for_service_config(self, config_questions: dict[str, bool], selected_services: list[str]) -> dict[str, Any]:
         config: dict[str, Any] = {
             "HOST_PORT": "",
             "CONTAINER_PORT": "",
             "DB_PASSWORD": ""
         }
-        for (question, key_in_final_dict) in zip(config_questions, config):
-            print(question)
-            prompt_to_input_config = input("")
-            if bool(config_questions[question]):
-                prompt_to_input_config = self.convert_str_to_int(prompt_to_input_config, question)
-            config[key_in_final_dict] = prompt_to_input_config
+        for service in selected_services:
+            for (question, key_in_final_dict) in zip(config_questions, config):
+                print(f"{service} - {question}")
+                prompt_to_input_config = input("")
+                if bool(config_questions[question]):
+                    prompt_to_input_config = self.convert_str_to_int(prompt_to_input_config, question)
+                config[key_in_final_dict] = prompt_to_input_config
 
         return config
 
 
     def map_services_to_configs(self, services: list[str]) -> dict[str, dict[str, Any]]:
         for each_service in services:
-            self.selected_services_and_config[each_service] = self.prompt_for_service_config(self.config_questions)
+            self.selected_services_and_config[each_service] = self.prompt_for_service_config(self.config_questions, self.selected_services)
 
         return self.selected_services_and_config
 
@@ -108,7 +109,7 @@ class UserInput:
     def main(self):
         print(self.offered_services)
         selected_services = self.determine_selected_services(self.user_selects_services(), self.service_to_number_mappings)
-        self.map_services_to_configs(selected_services)
+        print(self.map_services_to_configs(selected_services))
 
 
 class FillOutConfigFile:
@@ -117,7 +118,9 @@ class FillOutConfigFile:
 
 
     def convert_dict_to_yaml(self, services_config: dict[str, dict[str, Any]]):
-     return
+
+
+        return
 
 
     # def input_config_into_file(self, passed_config):
