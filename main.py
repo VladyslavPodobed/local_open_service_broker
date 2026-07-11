@@ -112,23 +112,54 @@ class UserInput:
         print(self.map_services_to_configs(selected_services))
 
 
+class WriteParsableConfig:
+    def __init__(self) -> None:
+        pass
+
+
+    def get_config(self, get_service: str, get_config: str, get_from: dict[str, dict[str, Any]]) -> Any | None:
+        for config in get_from.values():
+           pass 
+
+
+
 class FillOutConfigFile:
     def __init__(self) -> None:
         self.config_dir_path = "./generated/"
 
 
-    def convert_dict_to_yaml(self, services_config: dict[str, dict[str, Any]]):
-
-
+    def convert_dict_to_yaml(self):
         return
 
 
-    # def input_config_into_file(self, passed_config):
+    # def input_config_into_file(self):
     #     with open(self.config_dir_path, "w"):
     #         pass
         # subprocess.run()
 
 
-if __name__ == "__main__":
-    UserInput().main()
+# if __name__ == "__main__":
+#     UserInput().main()
 
+
+abc = {
+    "asd": {
+        "1": "value in inner dict",
+        "2": "value in inner dict",
+        "3": "value in inner dict"
+    },
+    "dsa": {
+        "----1": "value in inner dict",
+        "qwe": "desired value !!!!!!!!",
+        "3": "value in inner dict"
+    }
+}
+
+
+aaa = "qwe"
+
+for a in abc.values():
+    if aaa in a:
+        print(a[aaa])
+    # if i == aaa:
+        # print(f"{inner_dict[i]}")
