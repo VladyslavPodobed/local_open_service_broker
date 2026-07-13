@@ -82,26 +82,26 @@ class UserInput:
                 string_being_converted = input(question_being_asked)
 
 
-    def prompt_for_service_config(self, config_questions: dict[str, bool], selected_services: list[str]) -> dict[str, Any]:
+    def prompt_for_service_config(self, config_questions: dict[str, bool], service: str) -> dict[str, Any]:
         config: dict[str, Any] = {
             "HOST_PORT": "",
             "CONTAINER_PORT": "",
             "DB_PASSWORD": ""
         }
-        for service in selected_services:
-            for (question, key_in_final_dict) in zip(config_questions, config):
-                print(f"{service} - {question}")
-                prompt_to_input_config = input("")
-                if bool(config_questions[question]):
-                    prompt_to_input_config = self.convert_str_to_int(prompt_to_input_config, question)
-                config[key_in_final_dict] = prompt_to_input_config
+        for (question, key_in_final_dict) in zip(config_questions, config):
+            print(f"{service} - {question}")
+            prompt_to_input_config = input("")
+            if bool(config_questions[question]):
+                prompt_to_input_config = self.convert_str_to_int(prompt_to_input_config, question)
+            config[key_in_final_dict] = prompt_to_input_config
 
         return config
 
 
     def map_services_to_configs(self, services: list[str]) -> dict[str, dict[str, Any]]:
+        print(services)
         for each_service in services:
-            self.selected_services_and_config[each_service] = self.prompt_for_service_config(self.config_questions, self.selected_services)
+            self.selected_services_and_config[each_service] = self.prompt_for_service_config(self.config_questions, each_service)
 
         return self.selected_services_and_config
 
@@ -109,9 +109,12 @@ class UserInput:
     def main(self):
         print(self.offered_services)
         selected_services = self.determine_selected_services(self.user_selects_services(), self.service_to_number_mappings)
-        print(self.map_services_to_configs(selected_services))
+        self.map_services_to_configs(selected_services)
 
-
+###################
+###################
+###################
+###################
 class WriteParsableConfig:
     def __init__(self) -> None:
         pass
@@ -138,8 +141,8 @@ class FillOutConfigFile:
         # subprocess.run()
 
 
-# if __name__ == "__main__":
-#     UserInput().main()
+if __name__ == "__main__":
+    UserInput().main()
 
 
 abc = {
