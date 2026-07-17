@@ -1,12 +1,12 @@
 import re
 import subprocess
 from typing import Any
-
+  
 
 class UserInput:
     def __init__(self) -> None:
         self.service_to_number_mappings: dict[str, int] = {
-            "postgresql": 1,
+            "postgres": 1,
             "mysql": 2,
             "redis": 3,
             "nginx": 4
@@ -25,7 +25,7 @@ class UserInput:
         self.config_questions: dict[str, bool] = {
             # True is for inputs that must be int - done by the convert_str_to_int function and checked by the convert_str_to_int fucntion
             "Input port that should be open on the host: ": True,
-            "Input port that should be open on the container: ": True, 
+            "Input port that should be open on the container: ": True,
             "Input db's password: ": False
         }
         self.selected_services_and_config: dict[str, dict[str, Any]] = {}
@@ -111,19 +111,39 @@ class UserInput:
         selected_services = self.determine_selected_services(self.user_selects_services(), self.service_to_number_mappings)
         self.map_services_to_configs(selected_services)
 
-###################
-###################
-###################
-###################
-class WriteParsableConfig:
+        return print(self.selected_services_and_config)
+
+
+class ExtractConfigFromResponse:
     def __init__(self) -> None:
         pass
 
 
-    def get_config(self, get_service: str, get_config: str, get_from: dict[str, dict[str, Any]]) -> Any | None:
-        for config in get_from.values():
-           pass 
+    # no need to raise an exception, if key is not found
+    # as later on the "key-value pair" won't make it into the respective config file if it's None
+    def get_config(self, get_service: str, get_config: str, get_from: dict[str, dict[str, Any]]) -> Any:
+        for key, value in get_from.items():
+            if get_service in key and get_config in value:
 
+                return value[get_config]
+                
+
+
+dict_ = {
+    'postgres': {'HOST_PORT': 12, 'CONTAINER_PORT': 1, 'DB_PASSWORD': '1'},
+    'mysql': {'HOST_PORT': 10, 'CONTAINER_PORT': 1, 'DB_PASSWORD': '1'}
+}
+
+
+a = "mysql"
+b = 'HOST_PORT'
+for key, value in dict_.items():
+    if a in key and b in value:
+        print(value[b])
+        
+        
+    
+            
 
 
 class FillOutConfigFile:
@@ -131,38 +151,40 @@ class FillOutConfigFile:
         self.config_dir_path = "./generated/"
 
 
+    def write_base_config(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD: str) -> str:
+        with open(self.config_dir_path, "w") as compose_file:
+            compose_file.write("services:")
+
+        return f"""
+    {SERVICE_NAME}
+        image: {SERVICE_NAME}:latest
+
+        ports:
+            - "127.0.0.1:{HOST_PORT}:{CONTAINER_PORT}"
+      
+        deploy:
+            replicas: 1
+
+            restart_policy:
+                condition: on-failure
+
+            update_config:
+                condition: on-failure
+
+            rollback_config:
+                condition: on-failure
+
+        environment:
+            POSTGRES_PASSWORD: {DB_PASSWORD}
+"""
+
+
     def convert_dict_to_yaml(self):
         return
 
 
-    # def input_config_into_file(self):
-    #     with open(self.config_dir_path, "w"):
-    #         pass
-        # subprocess.run()
-
-
 if __name__ == "__main__":
     UserInput().main()
+    # ExtractConfigFromResponse().get_config("postgres", "HOST_PORT", )
+    # FillOutConfigFile().write_base_config()
 
-
-abc = {
-    "asd": {
-        "1": "value in inner dict",
-        "2": "value in inner dict",
-        "3": "value in inner dict"
-    },
-    "dsa": {
-        "----1": "value in inner dict",
-        "qwe": "desired value !!!!!!!!",
-        "3": "value in inner dict"
-    }
-}
-
-
-aaa = "qwe"
-
-for a in abc.values():
-    if aaa in a:
-        print(a[aaa])
-    # if i == aaa:
-        # print(f"{inner_dict[i]}")
