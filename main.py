@@ -111,7 +111,7 @@ class UserInput:
         selected_services = self.determine_selected_services(self.user_selects_services(), self.service_to_number_mappings)
         self.map_services_to_configs(selected_services)
 
-        return print(self.selected_services_and_config)
+        return self.selected_services_and_config
 
 
 class ExtractConfigFromResponse:
@@ -126,24 +126,6 @@ class ExtractConfigFromResponse:
             if get_service in key and get_config in value:
 
                 return value[get_config]
-                
-
-
-dict_ = {
-    'postgres': {'HOST_PORT': 12, 'CONTAINER_PORT': 1, 'DB_PASSWORD': '1'},
-    'mysql': {'HOST_PORT': 10, 'CONTAINER_PORT': 1, 'DB_PASSWORD': '1'}
-}
-
-
-a = "mysql"
-b = 'HOST_PORT'
-for key, value in dict_.items():
-    if a in key and b in value:
-        print(value[b])
-        
-        
-    
-            
 
 
 class FillOutConfigFile:
@@ -179,12 +161,41 @@ class FillOutConfigFile:
 """
 
 
-    def convert_dict_to_yaml(self):
-        return
+# {
+    # 'postgres': {'HOST_PORT': 12, 'CONTAINER_PORT': 12, 'DB_PASSWORD': '12'},
+    # 'mysql': {'HOST_PORT': 13, 'CONTAINER_PORT': 13, 'DB_PASSWORD': '13'}
+# }
 
 
-if __name__ == "__main__":
-    UserInput().main()
-    # ExtractConfigFromResponse().get_config("postgres", "HOST_PORT", )
-    # FillOutConfigFile().write_base_config()
+    def asasddsa(self, services_and_configs: dict[str, dict[str, Any]]) -> None:
+        # how many times we need to call the write_base_config func?
+        # 
+        
+        pass
 
+
+# if __name__ == "__main__":
+    # UserInput().main()
+    
+
+
+
+ll = [1, 2, 3, 4, 5]
+dd ={
+    "sth": 1,
+    "ssth": 2,
+    "sssth": 3
+}
+
+
+ff = len(ll)
+print(ff)
+
+# def test(passed_dd):
+#     for a in passed_dd.len():
+#         print(1)
+#         return True
+
+# while test(dd):
+#     for a in ll:
+#         print(f"--------------- {a}")
