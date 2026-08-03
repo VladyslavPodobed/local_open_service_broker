@@ -114,18 +114,18 @@ class UserInput:
         return self.selected_services_and_config
 
 
-class ExtractConfigFromResponse:
+class ExtractConfig:
     def __init__(self) -> None:
         pass
 
 
-    # no need to raise an exception, if key is not found
-    # as later on the "key-value pair" won't make it into the respective config file if it's None
-    def get_config(self, get_service: str, get_config: str, get_from: dict[str, dict[str, Any]]) -> Any:
-        for key, value in get_from.items():
-            if get_service in key and get_config in value:
+    def get_config(self, service: str, config: str, dictionary: dict[str, dict[str, Any]]) -> str | int | None:
+        if service in dictionary:
+            service_config = dictionary[service].items()
+            for key, value in service_config:
+                if key == config:
 
-                return value[get_config]
+                    return value
 
 
 class FillOutConfigFile:
@@ -174,28 +174,6 @@ class FillOutConfigFile:
         pass
 
 
-# if __name__ == "__main__":
-    # UserInput().main()
-    
-
-
-
-ll = [1, 2, 3, 4, 5]
-dd ={
-    "sth": 1,
-    "ssth": 2,
-    "sssth": 3
-}
-
-
-ff = len(ll)
-print(ff)
-
-# def test(passed_dd):
-#     for a in passed_dd.len():
-#         print(1)
-#         return True
-
-# while test(dd):
-#     for a in ll:
-#         print(f"--------------- {a}")
+if __name__ == "__main__":
+  # UserInput().main()
+  
