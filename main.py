@@ -1,5 +1,4 @@
 import re
-import subprocess
 from typing import Any
   
 
@@ -133,10 +132,7 @@ class FillOutConfigFile:
         self.config_dir_path = "./generated/"
 
 
-    def write_base_config(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD: str) -> str:
-        with open(self.config_dir_path, "w") as compose_file:
-            compose_file.write("services:")
-
+    def docker_compose_template(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD: str) -> str:
         return f"""
     {SERVICE_NAME}
         image: {SERVICE_NAME}:latest
@@ -160,20 +156,27 @@ class FillOutConfigFile:
             POSTGRES_PASSWORD: {DB_PASSWORD}
 """
 
-
-# {
-    # 'postgres': {'HOST_PORT': 12, 'CONTAINER_PORT': 12, 'DB_PASSWORD': '12'},
-    # 'mysql': {'HOST_PORT': 13, 'CONTAINER_PORT': 13, 'DB_PASSWORD': '13'}
-# }
-
-
-    def asasddsa(self, services_and_configs: dict[str, dict[str, Any]]) -> None:
-        # how many times we need to call the write_base_config func?
-        # 
-        
-        pass
-
+dd = None
 
 if __name__ == "__main__":
-  # UserInput().main()
+    dd = UserInput().main()
   
+
+for service in dd:
+    service_config = dd.get(service)
+    # service_config returns the following
+    # {'HOST_PORT': 1, 'CONTAINER_PORT': 1, 'DB_PASSWORD': '1'}
+    for i in service_config:
+        # i is key
+        # service_config[i] is value
+    # docker_compose_template(service)
+
+
+
+
+# TODO:
+# create a function that will iterate overate the final dict
+# for each service in the dict
+# iterate over keys in UserInput().prompt_for_service_config.config
+# match the key to the key in final dict
+# get value of the matched key with get_config
