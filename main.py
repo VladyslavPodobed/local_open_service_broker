@@ -1,4 +1,5 @@
 import re
+import subprocess
 from typing import Any
   
 
@@ -132,51 +133,51 @@ class FillOutConfigFile:
         self.config_dir_path = "./generated/"
 
 
-    def docker_compose_template(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD: str) -> str:
+    def first_line_in_compose_file(self) -> None:
+        with open(f"{self.config_dir_path}/docker-compose.yml", "w") as compose_file:
+            compose_file.write("services:")
+
+
+    def compose_template_for_one_service(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD: str) -> str:
         return f"""
     {SERVICE_NAME}
         image: {SERVICE_NAME}:latest
-
         ports:
             - "127.0.0.1:{HOST_PORT}:{CONTAINER_PORT}"
-      
         deploy:
             replicas: 1
-
             restart_policy:
                 condition: on-failure
-
             update_config:
                 condition: on-failure
-
             rollback_config:
                 condition: on-failure
-
         environment:
             POSTGRES_PASSWORD: {DB_PASSWORD}
 """
 
-dd = None
+
+    def fill_out_compose_file(self, final_config: dict[str, dict[str, Any]]) -> None:
+        for service in final_config:
+            config = final_config[service]
+            with open(f"{self.config_dir_path}/docker-compose.yml", "a") as compose_file:
+                compose_file.write(self.compose_template_for_one_service(
+                        SERVICE_NAME=f"{service}:",
+                        HOST_PORT=config["HOST_PORT"],
+                        CONTAINER_PORT=config["CONTAINER_PORT"],
+                        DB_PASSWORD=config["DB_PASSWORD"]
+                    )
+                )
+
+
+services_and_config = None
 
 if __name__ == "__main__":
-    dd = UserInput().main()
-  
+    services_and_config = UserInput().main()
+    build_docker_template = FillOutConfigFile()
+    build_docker_template.first_line_in_compose_file()
+    build_docker_template.fill_out_compose_file(services_and_config)
 
-for service in dd:
-    service_config = dd.get(service)
-    # service_config returns the following
-    # {'HOST_PORT': 1, 'CONTAINER_PORT': 1, 'DB_PASSWORD': '1'}
-    for i in service_config:
-        # i is key
-        # service_config[i] is value
-    # docker_compose_template(service)
+    
 
 
-
-
-# TODO:
-# create a function that will iterate overate the final dict
-# for each service in the dict
-# iterate over keys in UserInput().prompt_for_service_config.config
-# match the key to the key in final dict
-# get value of the matched key with get_config
