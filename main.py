@@ -1,5 +1,6 @@
 import re
 import subprocess
+from docker_manager import DockerManager
 from typing import Any
   
 
@@ -141,17 +142,12 @@ class FillOutConfigFile:
     def compose_template_for_one_service(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD: str) -> str:
         return f"""
     {SERVICE_NAME}
-        image: {SERVICE_NAME}:latest
+        image: {SERVICE_NAME}latest
+        # "deploy "block is only applicable to swarm;
+        # for local comnpose restart property must be defined at service lvl
+        restart: on-failure
         ports:
             - "127.0.0.1:{HOST_PORT}:{CONTAINER_PORT}"
-        deploy:
-            replicas: 1
-            restart_policy:
-                condition: on-failure
-            update_config:
-                condition: on-failure
-            rollback_config:
-                condition: on-failure
         environment:
             POSTGRES_PASSWORD: {DB_PASSWORD}
 """
@@ -177,7 +173,6 @@ if __name__ == "__main__":
     build_docker_template = FillOutConfigFile()
     build_docker_template.first_line_in_compose_file()
     build_docker_template.fill_out_compose_file(services_and_config)
-
-    
-
-
+    docker_manager = DockerManager()
+    docker_manager.spin_up_containers()
+    docker_manager.get_container_info()
