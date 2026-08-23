@@ -1,8 +1,8 @@
 import re
-import subprocess
-from docker_manager import DockerManager
 from typing import Any
-  
+from container_runtime import ContainerRuntime
+from docker import DockerRuntime
+
 
 class UserInput:
 
@@ -102,18 +102,6 @@ class UserInput:
         return self.selected_services_and_config
 
 
-class ExtractConfig:
-
-    def __init__(self) -> None:
-        pass
-
-    def get_config(self, service: str, config: str, dictionary: dict[str, dict[str, Any]]) -> str | int | None:
-        if service in dictionary:
-            service_config = dictionary[service].items()
-            for key, value in service_config:
-                if key == config:
-                    return value
-
 class FillOutConfigFile:
 
     def __init__(self) -> None:
@@ -125,8 +113,9 @@ class FillOutConfigFile:
 
     def compose_template_for_one_service(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD: str) -> str:
         return f"""
-    {SERVICE_NAME}
-        image: {SERVICE_NAME}latest
+    {SERVICE_NAME}:
+        image: {SERVICE_NAME}:latest
+        container_name: '{SERVICE_NAME}'
         # "deploy "block is only applicable to swarm;
         # for local comnpose restart property must be defined at service lvl
         restart: on-failure
@@ -141,7 +130,7 @@ class FillOutConfigFile:
             config = final_config[service]
             with open(f"{self.config_dir_path}/docker-compose.yml", "a") as compose_file:
                 compose_file.write(self.compose_template_for_one_service(
-                        SERVICE_NAME=f"{service}:",
+                        SERVICE_NAME=f"{service}",
                         HOST_PORT=config["HOST_PORT"],
                         CONTAINER_PORT=config["CONTAINER_PORT"],
                         DB_PASSWORD=config["DB_PASSWORD"]
@@ -150,13 +139,13 @@ class FillOutConfigFile:
 
 
 services_and_config = None
-
+runtime: ContainerRuntime = DockerRuntime()
 
 if __name__ == "__main__":
     services_and_config = UserInput().main()
     build_docker_template = FillOutConfigFile()
     build_docker_template.first_line_in_compose_file()
     build_docker_template.fill_out_compose_file(services_and_config)
-    docker_manager = DockerManager()
-    docker_manager.spin_up_containers()
-    docker_manager.get_container_info()
+    runtime.spin_up_containers()
+    runtime.list_running_containers()
+    
