@@ -11,5 +11,11 @@ class ContainerRuntime(ABC):
     def list_running_containers(self):
         pass
 
+    @abstractmethod
+    def are_all_containers_up(self):
+        pass
 
+    @abstractmethod
+    def are_all_containers_healthy(self):
+        pass
 
