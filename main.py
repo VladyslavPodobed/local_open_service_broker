@@ -1,7 +1,7 @@
 import re
 from typing import Any
 from container_runtime import ContainerRuntime
-from docker import DockerRuntime
+from docker_runtime import DockerRuntime
 
 
 class UserInput:
@@ -63,7 +63,7 @@ class UserInput:
         for key_in_dict in service_to_number_mappings:
             for selected_service_number in user_response:
                 if selected_service_number == service_to_number_mappings.get(key_in_dict):
-                    print(f"determine_selected_services returned: --- {key_in_dict}")
+                    # print(f"determine_selected_services returned: --- {key_in_dict}")
                     self.selected_services.append(key_in_dict)
         return self.selected_services
 
@@ -79,7 +79,7 @@ class UserInput:
         config: dict[str, Any] = {
             "HOST_PORT": "",
             "CONTAINER_PORT": "",
-            "DB_PASSWORD": ""
+            "DB_PASSWORD_VALUE": ""
         }
         for (question, key_in_final_dict) in zip(config_questions, config):
             print(f"{service} - {question}")
@@ -111,7 +111,7 @@ class FillOutConfigFile:
         with open(f"{self.config_dir_path}/docker-compose.yml", "w") as compose_file:
             compose_file.write("services:")
 
-    def compose_template_for_one_service(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD: str) -> str:
+    def compose_template_for_one_service(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD_KEY: str, DB_PASSWORD_VALUE: str) -> str:
         return f"""
     {SERVICE_NAME}:
         image: {SERVICE_NAME}:latest
@@ -122,8 +122,14 @@ class FillOutConfigFile:
         ports:
             - "127.0.0.1:{HOST_PORT}:{CONTAINER_PORT}"
         environment:
-            POSTGRES_PASSWORD: {DB_PASSWORD}
+            {DB_PASSWORD_KEY}: {DB_PASSWORD_VALUE}
 """
+
+    def determine_password_env_name(self, selected_service: str) -> str:
+        if selected_service == 'postgres':
+            return "POSTGRES_PASSWORD"
+        elif selected_service == 'mysql':
+            return "MYSQL_ROOT_PASSWORD"
 
     def fill_out_compose_file(self, final_config: dict[str, dict[str, Any]]) -> None:
         for service in final_config:
@@ -133,7 +139,8 @@ class FillOutConfigFile:
                         SERVICE_NAME=f"{service}",
                         HOST_PORT=config["HOST_PORT"],
                         CONTAINER_PORT=config["CONTAINER_PORT"],
-                        DB_PASSWORD=config["DB_PASSWORD"]
+                        DB_PASSWORD_KEY=self.determine_password_env_name(service),
+                        DB_PASSWORD_VALUE=config["DB_PASSWORD_VALUE"]
                     )
                 )
 
@@ -148,4 +155,5 @@ if __name__ == "__main__":
     build_docker_template.fill_out_compose_file(services_and_config)
     runtime.spin_up_containers()
     runtime.list_running_containers()
+    runtime.inspect_containers()
     
