@@ -1,9 +1,15 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Generic, TypeVar
+
+
+T = TypeVar('T')
 
 
 @dataclass
-class Result:
-    success: bool
-    return_value: Any | None = None
-    error: str | None = None
+class Success(Generic[T]):
+    return_value: T | None = None
+
+
+@dataclass
+class Failure(Generic[T]):
+    error_description: str = ""
