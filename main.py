@@ -1,4 +1,5 @@
 import re
+from time import sleep
 from typing import Any
 from container_runtime import ContainerRuntime
 from docker_runtime import DockerRuntime
@@ -154,6 +155,6 @@ if __name__ == "__main__":
     build_docker_template.first_line_in_compose_file()
     build_docker_template.fill_out_compose_file(services_and_config)
     runtime.spin_up_containers()
-    runtime.list_running_containers()
-    runtime.inspect_containers()
-    
+    spun_up_containers_and_attributes = runtime.inspect_containers()
+    runtime.are_all_containers_up(services_and_config, spun_up_containers_and_attributes.return_value)
+    runtime.are_all_containers_healthy(spun_up_containers_and_attributes.return_value)
