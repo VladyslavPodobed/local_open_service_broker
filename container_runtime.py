@@ -8,7 +8,7 @@ class ContainerRuntime(ABC):
         pass
 
     @abstractmethod
-    def list_running_containers(self):
+    def inspect_containers(self):
         pass
 
     @abstractmethod
