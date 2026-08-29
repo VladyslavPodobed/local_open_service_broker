@@ -103,7 +103,7 @@ class UserInput:
         return self.selected_services_and_config
 
 
-class FillOutConfigFile:
+class FillOutComposeFile:
 
     def __init__(self) -> None:
         self.config_dir_path = "./generated/"
@@ -117,8 +117,6 @@ class FillOutConfigFile:
     {SERVICE_NAME}:
         image: {SERVICE_NAME}:latest
         container_name: '{SERVICE_NAME}'
-        # "deploy "block is only applicable to swarm;
-        # for local comnpose restart property must be defined at service lvl
         restart: on-failure
         ports:
             - "127.0.0.1:{HOST_PORT}:{CONTAINER_PORT}"
@@ -151,10 +149,11 @@ runtime: ContainerRuntime = DockerRuntime()
 
 if __name__ == "__main__":
     services_and_config = UserInput().main()
-    build_docker_template = FillOutConfigFile()
+    build_docker_template = FillOutComposeFile()
     build_docker_template.first_line_in_compose_file()
     build_docker_template.fill_out_compose_file(services_and_config)
     runtime.spin_up_containers()
     spun_up_containers_and_attributes = runtime.inspect_containers()
     runtime.are_all_containers_up(services_and_config, spun_up_containers_and_attributes.return_value)
     runtime.are_all_containers_healthy(spun_up_containers_and_attributes.return_value)
+
