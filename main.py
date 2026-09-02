@@ -1,8 +1,8 @@
 import re
-from time import sleep
+import argparse
 from typing import Any
 from container_runtime import ContainerRuntime
-from docker_runtime import DockerRuntime
+from podman_runtime import PodmanRuntime
 
 
 class UserInput:
@@ -105,12 +105,19 @@ class UserInput:
 
 class FillOutComposeFile:
 
+    # should be a class var instead of instance var as I expect the var to have the same value across all instances
+    # must be defined before "__init__"
+    config_file_path = "./generated/docker-compose.yml"
+    
     def __init__(self) -> None:
-        self.config_dir_path = "./generated/"
+        pass
 
     def first_line_in_compose_file(self) -> None:
-        with open(f"{self.config_dir_path}/docker-compose.yml", "w") as compose_file:
-            compose_file.write("services:")
+        try:
+            with open(self.config_file_path, "w") as compose_file:
+                compose_file.write("services:")
+        except FileNotFoundError:
+            raise SystemExit('asdasds')
 
     def compose_template_for_one_service(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD_KEY: str, DB_PASSWORD_VALUE: str) -> str:
         return f"""
@@ -133,7 +140,7 @@ class FillOutComposeFile:
     def fill_out_compose_file(self, final_config: dict[str, dict[str, Any]]) -> None:
         for service in final_config:
             config = final_config[service]
-            with open(f"{self.config_dir_path}/docker-compose.yml", "a") as compose_file:
+            with open(self.config_file_path, "a") as compose_file:
                 compose_file.write(self.compose_template_for_one_service(
                         SERVICE_NAME=f"{service}",
                         HOST_PORT=config["HOST_PORT"],
@@ -145,15 +152,32 @@ class FillOutComposeFile:
 
 
 services_and_config = None
-runtime: ContainerRuntime = DockerRuntime()
+
+
+parser = argparse.ArgumentParser()
+unique_arg = parser.add_mutually_exclusive_group()
+unique_arg.add_argument('-d', '--docker', action='store_true')
+unique_arg.add_argument('-p', '--podman', action="store_true")
+cli_args = parser.parse_args()
+
+if cli_args.docker:
+    from docker_runtime import DockerRuntime
+    runtime: ContainerRuntime = DockerRuntime()
+elif cli_args.podman:
+    from podman_runtime import PodmanRuntime
+    runtime: ContainerRuntime = PodmanRuntime()
+else:
+    from docker_runtime import DockerRuntime
+    runtime: ContainerRuntime = DockerRuntime()
+
 
 if __name__ == "__main__":
     services_and_config = UserInput().main()
     build_docker_template = FillOutComposeFile()
     build_docker_template.first_line_in_compose_file()
     build_docker_template.fill_out_compose_file(services_and_config)
+    runtime.verify_dependency()
     runtime.spin_up_containers()
     spun_up_containers_and_attributes = runtime.inspect_containers()
     runtime.are_all_containers_up(services_and_config, spun_up_containers_and_attributes.return_value)
     runtime.are_all_containers_healthy(spun_up_containers_and_attributes.return_value)
-
