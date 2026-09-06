@@ -2,7 +2,7 @@ import re
 import argparse
 from typing import Any
 from container_runtime import ContainerRuntime
-from podman_runtime import PodmanRuntime
+from docker_runtime import DockerRuntime
 
 
 class UserInput:
@@ -107,7 +107,9 @@ class FillOutComposeFile:
 
     # should be a class var instead of instance var as I expect the var to have the same value across all instances
     # must be defined before "__init__"
-    config_file_path = "./generated/docker-compose.yml"
+    config_file_path = "./generated/docker_compose.yml"
+
+    compose_network = "open_broker_network"
     
     def __init__(self) -> None:
         pass
@@ -116,10 +118,10 @@ class FillOutComposeFile:
         try:
             with open(self.config_file_path, "w") as compose_file:
                 compose_file.write("services:")
-        except FileNotFoundError:
-            raise SystemExit('asdasds')
+        except FileNotFoundError as e:
+            raise SystemExit(f"couldn't find docker-compose.yml in './generated/': {e}")
 
-    def compose_template_for_one_service(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD_KEY: str, DB_PASSWORD_VALUE: str) -> str:
+    def postgres_compose(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD_VALUE: str) -> str:
         return f"""
     {SERVICE_NAME}:
         image: {SERVICE_NAME}:latest
@@ -128,27 +130,53 @@ class FillOutComposeFile:
         ports:
             - "127.0.0.1:{HOST_PORT}:{CONTAINER_PORT}"
         environment:
-            {DB_PASSWORD_KEY}: {DB_PASSWORD_VALUE}
+            POSTGRES_PASSWORD: '{DB_PASSWORD_VALUE}'
+        networks:
+            - {self.compose_network}
 """
 
-    def determine_password_env_name(self, selected_service: str) -> str:
-        if selected_service == 'postgres':
-            return "POSTGRES_PASSWORD"
-        elif selected_service == 'mysql':
-            return "MYSQL_ROOT_PASSWORD"
+    def mysql_compose(self, SERVICE_NAME: str, HOST_PORT: int, CONTAINER_PORT: int, DB_PASSWORD_VALUE: str) -> str:
+        return f"""
+    {SERVICE_NAME}:
+        image: {SERVICE_NAME}:latest
+        container_name: '{SERVICE_NAME}'
+        restart: on-failure
+        ports:
+            - "127.0.0.1:{HOST_PORT}:{CONTAINER_PORT}"
+        environment:
+            MYSQL_ROOT_PASSWORD: '{DB_PASSWORD_VALUE}'
+        networks:
+            - {self.compose_network}
+"""
 
-    def fill_out_compose_file(self, final_config: dict[str, dict[str, Any]]) -> None:
-        for service in final_config:
-            config = final_config[service]
-            with open(self.config_file_path, "a") as compose_file:
-                compose_file.write(self.compose_template_for_one_service(
+    def define_compose_network(self):
+        with open(self.config_file_path, "a") as compose_file:
+            compose_file.write(f"""
+networks:
+    {self.compose_network}:
+        driver: bridge
+""")
+        
+    def fill_out_compose_file(self, services_and_config: dict[str, dict[str, Any]]) -> str:
+        for service in services_and_config:
+            if service == 'postgres':
+                config = services_and_config[service]
+                with open(self.config_file_path, "a") as compose_file:
+                    compose_file.write(self.postgres_compose(
                         SERVICE_NAME=f"{service}",
                         HOST_PORT=config["HOST_PORT"],
                         CONTAINER_PORT=config["CONTAINER_PORT"],
-                        DB_PASSWORD_KEY=self.determine_password_env_name(service),
-                        DB_PASSWORD_VALUE=config["DB_PASSWORD_VALUE"]
+                        DB_PASSWORD_VALUE=config["DB_PASSWORD_VALUE"])
                     )
-                )
+            elif service == 'mysql':
+                config = services_and_config[service]
+                with open(self.config_file_path, "a") as compose_file:
+                    compose_file.write(self.mysql_compose(
+                        SERVICE_NAME=f"{service}",
+                        HOST_PORT=config["HOST_PORT"],
+                        CONTAINER_PORT=config["CONTAINER_PORT"],
+                        DB_PASSWORD_VALUE=config["DB_PASSWORD_VALUE"])
+                    )
 
 
 services_and_config = None
@@ -160,24 +188,17 @@ unique_arg.add_argument('-d', '--docker', action='store_true')
 unique_arg.add_argument('-p', '--podman', action="store_true")
 cli_args = parser.parse_args()
 
-if cli_args.docker:
-    from docker_runtime import DockerRuntime
-    runtime: ContainerRuntime = DockerRuntime()
-elif cli_args.podman:
-    from podman_runtime import PodmanRuntime
-    runtime: ContainerRuntime = PodmanRuntime()
-else:
-    from docker_runtime import DockerRuntime
-    runtime: ContainerRuntime = DockerRuntime()
-
+runtime: ContainerRuntime = DockerRuntime()
 
 if __name__ == "__main__":
     services_and_config = UserInput().main()
     build_docker_template = FillOutComposeFile()
     build_docker_template.first_line_in_compose_file()
     build_docker_template.fill_out_compose_file(services_and_config)
+    build_docker_template.define_compose_network()
     runtime.verify_dependency()
     runtime.spin_up_containers()
     spun_up_containers_and_attributes = runtime.inspect_containers()
-    runtime.are_all_containers_up(services_and_config, spun_up_containers_and_attributes.return_value)
-    runtime.are_all_containers_healthy(spun_up_containers_and_attributes.return_value)
+    runtime.are_all_containers_up(services_and_config, spun_up_containers_and_attributes)
+    runtime.are_all_containers_healthy(spun_up_containers_and_attributes)
+
