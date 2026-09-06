@@ -3,6 +3,11 @@ from abc import ABC, abstractmethod
 
 class ContainerRuntime(ABC):
 
+    @staticmethod
+    @abstractmethod
+    def verify_dependency():
+        pass
+
     @abstractmethod
     def spin_up_containers(self):
         pass
