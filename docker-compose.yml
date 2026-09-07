@@ -1,0 +1,77 @@
+services:
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - target: 9090
+        published: 9090
+        host_ip: 127.0.0.1
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus.yml'
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    networks:
+      - observability_network
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - target: 3100
+        published: 3100
+    networks:
+      - observability_network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - target: 3000
+        published: 3000
+    container_name: grafana
+    volumes:
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    networks:
+      - observability_network
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter
+    ports:
+      - target: 9187
+        published: 9187
+    container_name: prometheus_exporter
+    environment:
+      DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
+    depends_on:
+      prometheus:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - observability_network
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    ports:
+      - target: 9100
+        published: 9100
+    pid: host
+    restart: unless-stopped
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    networks:
+      - observability_network
+
+
+volumes:
+  prometheus_data:
+
+
+networks:
+  observability_network:
+    driver: bridge
+

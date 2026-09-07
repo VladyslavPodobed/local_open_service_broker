@@ -1,0 +1,11 @@
+apiVersion: 1
+datasources:
+  - name: prometheus
+    type: prometheus
+    access: server
+    url: http://prometheus:9090
+
+  - name: postgres_exporter
+    type: postgres_exporter
+    access: server
+    url: http://prometheus_exporter:9187
