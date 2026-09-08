@@ -1,5 +1,6 @@
 import re
 import argparse
+import subprocess
 from typing import Any
 from container_runtime import ContainerRuntime
 from docker_runtime import DockerRuntime
@@ -109,7 +110,7 @@ class FillOutComposeFile:
     # must be defined before "__init__"
     config_file_path = "./generated/docker_compose.yml"
 
-    compose_network = "open_broker_network"
+    compose_network = "observability_network"
     
     def __init__(self) -> None:
         pass
@@ -179,6 +180,17 @@ networks:
                     )
 
 
+class Observability:
+    def __init__(self) -> None:
+        pass
+
+    def spin_up_observability(self):
+        docker_compose_up = subprocess.run(['docker', 'compose', '-p', 'generated', 'up', '-d'], capture_output=True)
+        if docker_compose_up.returncode != 0:
+            raise SystemExit("couldn't spin up the observability stack containers")
+        print('observability stack is up')
+
+
 services_and_config = None
 
 
@@ -196,6 +208,7 @@ if __name__ == "__main__":
     build_docker_template.first_line_in_compose_file()
     build_docker_template.fill_out_compose_file(services_and_config)
     build_docker_template.define_compose_network()
+    Observability().spin_up_observability()
     runtime.verify_dependency()
     runtime.spin_up_containers()
     spun_up_containers_and_attributes = runtime.inspect_containers()
