@@ -8,7 +8,7 @@ services:
         host_ip: 127.0.0.1
     container_name: prometheus
     command:
-      - '--config.file=/etc/prometheus.yml'
+      - '--config.file=/etc/prometheus/prometheus.yml'
     volumes:
       - ./prometheus:/etc/prometheus
       - prometheus_data:/prometheus
@@ -39,7 +39,7 @@ services:
     ports:
       - target: 9187
         published: 9187
-    container_name: prometheus_exporter
+    container_name: postgres_exporter
     environment:
       DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
     depends_on:
