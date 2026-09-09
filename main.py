@@ -104,7 +104,7 @@ class UserInput:
         return self.selected_services_and_config
 
 
-class FillOutComposeFile:
+class UserCompose:
 
     # should be a class var instead of instance var as I expect the var to have the same value across all instances
     # must be defined before "__init__"
@@ -131,7 +131,9 @@ class FillOutComposeFile:
         ports:
             - "127.0.0.1:{HOST_PORT}:{CONTAINER_PORT}"
         environment:
+            POSTGRES_USER: 'postgres'
             POSTGRES_PASSWORD: '{DB_PASSWORD_VALUE}'
+            POSTGRES_HOST_AUTH_METHOD: 'scram-sha-256'
         networks:
             - {self.compose_network}
 """
@@ -158,7 +160,7 @@ networks:
         driver: bridge
 """)
         
-    def fill_out_compose_file(self, services_and_config: dict[str, dict[str, Any]]) -> str:
+    def fill_out_compose_file(self, services_and_config: dict[str, dict[str, Any]]):
         for service in services_and_config:
             if service == 'postgres':
                 config = services_and_config[service]
@@ -180,15 +182,24 @@ networks:
                     )
 
 
-class Observability:
+class ObservabilityCompose:
+
+    observability_compose_path = "./docker-compose.yml"
+    
     def __init__(self) -> None:
         pass
 
-    def spin_up_observability(self):
-        docker_compose_up = subprocess.run(['docker', 'compose', '-p', 'generated', 'up', '-d'], capture_output=True)
-        if docker_compose_up.returncode != 0:
-            raise SystemExit("couldn't spin up the observability stack containers")
-        print('observability stack is up')
+    def observability_compose_contents(self) -> str:
+        with open(self.observability_compose_path, "r") as compose_file:
+            compose_file = compose_file.read()
+        return compose_file
+
+    def postgres_password_env(self, observability_compose: str, services_and_config: dict[str, dict[str, Any]]) -> str:
+        postgres_password = services_and_config['postgres']['DB_PASSWORD_VALUE']
+        with open(self.observability_compose_path, "w") as compose_file:
+            compose_file.write(
+                re.sub(r'(\s+DATA_SOURCE_PASS:\s*).*', rf'\1"{postgres_password}"', observability_compose)
+            )
 
 
 services_and_config = None
@@ -204,11 +215,13 @@ runtime: ContainerRuntime = DockerRuntime()
 
 if __name__ == "__main__":
     services_and_config = UserInput().main()
-    build_docker_template = FillOutComposeFile()
+    build_docker_template = UserCompose()
     build_docker_template.first_line_in_compose_file()
     build_docker_template.fill_out_compose_file(services_and_config)
     build_docker_template.define_compose_network()
-    Observability().spin_up_observability()
+    observability = ObservabilityCompose()
+    observability_compose_contents = observability.observability_compose_contents()
+    observability.postgres_password_env(observability_compose_contents, services_and_config)
     runtime.verify_dependency()
     runtime.spin_up_containers()
     spun_up_containers_and_attributes = runtime.inspect_containers()
