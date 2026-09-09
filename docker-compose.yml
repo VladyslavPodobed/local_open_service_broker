@@ -41,6 +41,8 @@ services:
         published: 9187
     container_name: postgres_exporter
     environment:
+      DATA_SOURCE_USER: 'postgres'
+      DATA_SOURCE_PASS: "sample_password"
       DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
     depends_on:
       prometheus:
@@ -74,4 +76,3 @@ volumes:
 networks:
   observability_network:
     driver: bridge
-
