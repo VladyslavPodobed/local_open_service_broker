@@ -18,12 +18,15 @@ class DockerRuntime(ContainerRuntime):
         return docker_compose_dependency.returncode
 
     def spin_up_containers(self) -> int:
-        from main import FillOutComposeFile
-        compose_file_path = FillOutComposeFile.config_file_path
-        docker_compose_up = subprocess.run(['docker', 'compose', '-f', f'{compose_file_path}', 'up', '-d'], capture_output=True)
+        from main import UserCompose
+        compose_file_path = UserCompose.config_file_path
+        docker_compose_up = subprocess.run(['docker', 'compose', '-p', 'generated','-f', f'{compose_file_path}', 'up', '-d'], capture_output=True)
         if docker_compose_up.returncode != 0:
             error_message = print(f"couldn't spin up containers due to: {docker_compose_up.stderr}")
             raise SystemExit(error_message)
+        docker_compose_up = subprocess.run(['docker', 'compose', '-p', 'generated', 'up', '-d'])
+        if docker_compose_up.returncode != 0:
+            error_message = print(f"couldn't spin up observability containers due to {docker_compose_up.stderr}")
         print('container/s are up')
         return docker_compose_up.returncode
 
