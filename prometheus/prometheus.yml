@@ -13,7 +13,7 @@ scrape_configs:
   - job_name: postgres
     static_configs:
       - targets:
-          - "prometheus:9090"
+          - "postgres:5432"
     # scrape_native_histograms: false
     # metrics_path: /metrics
     # honor_labels: false
