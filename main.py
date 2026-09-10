@@ -219,6 +219,7 @@ if __name__ == "__main__":
     build_docker_template.first_line_in_compose_file()
     build_docker_template.fill_out_compose_file(services_and_config)
     build_docker_template.define_compose_network()
+    subprocess.run(['uv', 'run', 'python', './grafana/dashboards.py'])
     observability = ObservabilityCompose()
     observability_compose_contents = observability.observability_compose_contents()
     observability.postgres_password_env(observability_compose_contents, services_and_config)
@@ -227,4 +228,3 @@ if __name__ == "__main__":
     spun_up_containers_and_attributes = runtime.inspect_containers()
     runtime.are_all_containers_up(services_and_config, spun_up_containers_and_attributes)
     runtime.are_all_containers_healthy(spun_up_containers_and_attributes)
-
