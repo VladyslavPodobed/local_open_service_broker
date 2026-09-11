@@ -4,6 +4,7 @@ datasources:
     type: prometheus
     access: server
     url: http://prometheus:9090
+    isDefault: true
 
   - name: postgres_exporter
     type: postgres_exporter

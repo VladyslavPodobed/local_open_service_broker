@@ -1,3 +1,4 @@
+from os import stat
 from grafana_foundation_sdk.builders.dashboard import Dashboard, Row
 from grafana_foundation_sdk.builders import prometheus, timeseries
 from grafana_foundation_sdk.cog.encoder import JSONEncoder
@@ -13,17 +14,15 @@ def postgres_dashboard() -> Dashboard:
         .refresh("1m")
         .time("now-30m", "now")
         .timezone(TimeZoneBrowser)
-        .with_row(Row("connect_to_postgres"))
+        .with_row(Row("availability"))
         .with_panel(
             timeseries.Panel()
-            .title("could connect to postgres")
+            .title("postgres ip up/down")
             .unit(units.BitsPerSecondSI)
             .min(0)
             .with_target(
                 prometheus.Dataquery()
-                .expr(
-                    'pg_up'
-                )
+                .expr('pg_up')
                 .legend_format("{{ device }}")
             )
         )
