@@ -8,31 +8,33 @@ from docker_runtime import DockerRuntime
 
 class UserInput:
 
+    service_to_number_mappings: dict[str, int] = {
+        "postgres": 1,
+        "mysql": 2,
+        "redis": 3,
+        "nginx": 4
+    }
+    offered_services = """
+Select the number of the respective service/s that you need:
+    [1] - PostgreSQL
+    [2] - MySQL
+    [3] - Redis
+    [4] - Nginx
+e.g.
+    if u need PostgreSQL - $: 1
+    if u need PostgreSQL and MySQL - $: 1 2
+"""
+    config_questions: dict[str, bool] = {
+        # True is for inputs that must be int - done by the convert_str_to_int function and checked by the convert_str_to_int fucntion
+        "Input port that should be open on the host: ": True,
+        "Input port that should be open on the container: ": True,
+        "Input db's password: ": False
+    }
+    selected_services: list[str] = []
+    selected_services_and_config: dict[str, dict[str, Any]] = {}
+
     def __init__(self) -> None:
-        self.service_to_number_mappings: dict[str, int] = {
-            "postgres": 1,
-            "mysql": 2,
-            "redis": 3,
-            "nginx": 4
-        }
-        self.selected_services: list[str] = []
-        self.offered_services = """
-        Select the number of the respective service/s that you need:
-            [1] - PostgreSQL
-            [2] - MySQL
-            [3] - Redis
-            [4] - Nginx
-        e.g.
-            if u need PostgreSQL - $: 1
-            if u need PostgreSQL and MySQL - $: 1 2
-        """
-        self.config_questions: dict[str, bool] = {
-            # True is for inputs that must be int - done by the convert_str_to_int function and checked by the convert_str_to_int fucntion
-            "Input port that should be open on the host: ": True,
-            "Input port that should be open on the container: ": True,
-            "Input db's password: ": False
-        }
-        self.selected_services_and_config: dict[str, dict[str, Any]] = {}
+        pass
 
     # the function is used in user_selects_services; it exists so that I can jsut add any number of services to the "offered_services" var
     # knowing that the max number that will be accepted from user's input is not greater than the number belonging to the last service
