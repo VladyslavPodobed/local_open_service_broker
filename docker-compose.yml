@@ -62,9 +62,11 @@ services:
     command:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
+      - /:/rootfs:ro
     networks:
       - observability_network
 
