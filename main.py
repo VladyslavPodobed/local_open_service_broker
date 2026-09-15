@@ -8,15 +8,15 @@ from container_runtime import ContainerRuntime
 from docker_runtime import DockerRuntime
 
 
-class ServiceName(StrEnum):
-    POSTGRES = 'postgres'
-    MYSQL = 'mysql'
-    REDIS = 'redis'
-    NGINX = 'nginx'
+# class ServiceName(StrEnum):
+#     POSTGRES = 'postgres'
+#     MYSQL = 'mysql'
+#     REDIS = 'redis'
+#     NGINX = 'nginx'
 
 
-# gotta use it somehow
-    # assign Service.service_questions based on its value
+# # gotta use it somehow
+#   # assign Service.service_questions based on its value
 # class ServiceType(StrEnum):
 #     DB = 'db'
 #     PROXY = 'proxy'
@@ -26,26 +26,11 @@ class ServiceName(StrEnum):
 # class BaseServiceConfig:
 #     target_port: int = 0
 #     published_port: int = 0
-
 # @dataclass
 # class DBConfig(BaseServiceConfig):
 #     db_password: str = ''
 # @dataclass
 # class ProxyConfig(BaseServiceConfig):
-#     pass
-
-# @dataclass
-# class PostgresConfig(DBConfig):
-#     pass
-# @dataclass
-# class MysqlConfig(DBConfig):
-#     pass
-# @dataclass
-# class RedisConfig(DBConfig):
-#     pass
-
-# @dataclass
-# class NginxConfig(ProxyConfig):
 #     pass
 
 
@@ -66,7 +51,7 @@ class ServiceName(StrEnum):
 
 
 # @dataclass
-# class Service[ServiceConfig: DBConfig | ProxyConfig]:
+# class Service[ServiceConfig: BaseServiceConfig]:
 #     service_id: int
 #     service_name: ServiceName
 #     service_type: ServiceType
@@ -75,10 +60,10 @@ class ServiceName(StrEnum):
 
 
 # services = [
-#     Service(1, ServiceName.POSTGRES, ServiceType.DB, DB_QUESTIONS, PostgresConfig()),
-#     Service(2, ServiceName.MYSQL, ServiceType.DB, DB_QUESTIONS, MysqlConfig()),
-#     Service(3, ServiceName.REDIS, ServiceType.DB, DB_QUESTIONS, RedisConfig()),
-#     Service(4, ServiceName.NGINX, ServiceType.PROXY, PROXY_QUESTIONS, NginxConfig())
+#     Service(1, ServiceName.POSTGRES, ServiceType.DB, DB_QUESTIONS, DBConfig()),
+#     Service(2, ServiceName.MYSQL, ServiceType.DB, DB_QUESTIONS, DBConfig()),
+#     Service(3, ServiceName.REDIS, ServiceType.DB, DB_QUESTIONS, DBConfig()),
+#     Service(4, ServiceName.NGINX, ServiceType.PROXY, PROXY_QUESTIONS, ProxyConfig())
 # ]
 
 
@@ -90,23 +75,22 @@ class ServiceName(StrEnum):
 #     # staticmethod because func doesn't need to read/write any instance attrs or call other methods
 #     @staticmethod
 #     def create_first_message() -> str:
-#         first_message_half = """
-#     Select the number of the respective service/s that you need:"""
+#         first_message_half = "Select the number of the respective service/s that you need:"
 #         for service in services:
 #             first_message_half += f"\n[{service.service_id}] - [{service.service_name}]"
 #         last_message_half = f"""
-#     e.g.
-#         if u need {services[0].service_id} - $: {services[0].service_name}
-#         if u need {services[0].service_name} and {services[1].service_name} - $: {services[0].service_id} {services[1].service_id}
-#     """
+# e.g.
+# if u need {services[0].service_id} - $: {services[0].service_name}
+# if u need {services[0].service_name} and {services[1].service_name} - $: {services[0].service_id} {services[1].service_id}
+# """
 #         return first_message_half + last_message_half
-
-#     def print_first_message(self, message: str) -> str:
-#         return print(message)
-
+    
+#     def print_first_message(self, initial_message: str):
+#         return print(initial_message)
 
 #     def main(self):
-        
+#         initial_message = self.create_first_message()
+#         self.print_first_message(initial_message)
 
 
 # if __name__ == "__main__":
