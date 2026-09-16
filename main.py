@@ -59,7 +59,7 @@ from docker_runtime import DockerRuntime
 #     service_config: ServiceConfig
 
 
-# services = [
+# services: list[Service] = [
 #     Service(1, ServiceName.POSTGRES, ServiceType.DB, DB_QUESTIONS, DBConfig()),
 #     Service(2, ServiceName.MYSQL, ServiceType.DB, DB_QUESTIONS, DBConfig()),
 #     Service(3, ServiceName.REDIS, ServiceType.DB, DB_QUESTIONS, DBConfig()),
@@ -67,35 +67,58 @@ from docker_runtime import DockerRuntime
 # ]
 
 
-# class InitialMessage():
-
-#     def __init__(self) -> None:
-#         pass
-
-#     # staticmethod because func doesn't need to read/write any instance attrs or call other methods
-#     @staticmethod
-#     def create_first_message() -> str:
-#         first_message_half = "Select the number of the respective service/s that you need:"
-#         for service in services:
-#             first_message_half += f"\n[{service.service_id}] - [{service.service_name}]"
-#         last_message_half = f"""
+# def create_initial_message():
+#     message = "Select the number of the respective service/s that you need:"
+#     for service in services:
+#         message += f"\n[{service.service_id}] - {service.service_name}"
+#     message += f"""
 # e.g.
-# if u need {services[0].service_id} - $: {services[0].service_name}
-# if u need {services[0].service_name} and {services[1].service_name} - $: {services[0].service_id} {services[1].service_id}
-# """
-#         return first_message_half + last_message_half
-    
-#     def print_first_message(self, initial_message: str):
-#         return print(initial_message)
+# if u need {services[0].service_name} - $: {services[0].service_id}
+# if u need {services[0].service_name} {services[1].service_name} - $: {services[0].service_id} {services[1].service_id}"""
+#     return message
 
-#     def main(self):
-#         initial_message = self.create_first_message()
-#         self.print_first_message(initial_message)
+# print(create_initial_message())
 
 
-# if __name__ == "__main__":
-#     initial_message = InitialMessage()
-#     initial_message.main()
+# def prompt():
+#     provided_input = input()
+#     extracted_ids = remove_non_numbers(provided_input)
+#     valid_extracted_ids = selected_services_exist(extracted_ids)
+
+# def remove_non_numbers(provided_input) -> list[int]:
+#     try:
+#         provided_input = re.sub('\.|\?|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\;|\:|\'|\"|\{|\}|\[|\|\<|\>|\`|\~|\\\|\/|\|', ',', provided_input)
+#         provided_input = re.sub('[a-z]', '', provided_input)
+#         provided_input = re.sub(',', ' ', provided_input).split()
+#         provided_input = sorted(list(set(provided_input)))
+#         provided_input = [int(i) for i in provided_input if int(i)]
+#         print(f"--- {provided_input}")
+#         if not provided_input:
+#             print("ccccan't understand your input, enter only numbers: ")
+#             prompt()
+#     except:
+#         print("can't understand your input, enter only numbers: ")
+#         prompt()
+#     return provided_input
+
+# all_service_ids= [service.service_id for service in services if service.service_id]
+# print(f"all service ids: {all_service_ids}")
+
+# def selected_services_exist(provided_service_ids: list[int]) -> list[int]:
+#     chosen_services: list[int] = [id for id in provided_service_ids if id in all_service_ids]
+#     if not chosen_services:
+#         print(f"none of the provided ids are valid, enter valid ids: ")
+#         prompt()
+#     non_existing_services: list[int] = [id for id in provided_service_ids if id not in all_service_ids]
+#     if non_existing_services:
+#         print(f"didn't find services with corresponding id's: {non_existing_services}")
+#     print(f"service ids you selected: {chosen_services}")
+#     print(f"+ {chosen_services}")
+#     print(f"- {non_existing_services}")
+#     return chosen_services
+
+
+# prompt()
 
 class UserInput:
 
