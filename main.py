@@ -1,3 +1,4 @@
+from os.path import join
 import re
 import argparse
 import subprocess
@@ -76,14 +77,14 @@ from docker_runtime import DockerRuntime
 # if u need {services[0].service_name} - $: {services[0].service_id}
 # if u need {services[0].service_name} {services[1].service_name} - $: {services[0].service_id} {services[1].service_id}"""
 #     return message
-
 # print(create_initial_message())
 
 
-# def prompt():
+# def prompt() -> list[Service]:
 #     provided_input = input()
 #     extracted_ids = remove_non_numbers(provided_input)
-#     valid_extracted_ids = selected_services_exist(extracted_ids)
+#     valid_services = selected_services_exist(extracted_ids)
+#     return valid_services
 
 # def remove_non_numbers(provided_input) -> list[int]:
 #     try:
@@ -92,7 +93,6 @@ from docker_runtime import DockerRuntime
 #         provided_input = re.sub(',', ' ', provided_input).split()
 #         provided_input = sorted(list(set(provided_input)))
 #         provided_input = [int(i) for i in provided_input if int(i)]
-#         print(f"--- {provided_input}")
 #         if not provided_input:
 #             print("ccccan't understand your input, enter only numbers: ")
 #             prompt()
@@ -101,24 +101,23 @@ from docker_runtime import DockerRuntime
 #         prompt()
 #     return provided_input
 
-# all_service_ids= [service.service_id for service in services if service.service_id]
-# print(f"all service ids: {all_service_ids}")
+# all_service_ids = [service.service_id for service in services if service.service_id]
 
-# def selected_services_exist(provided_service_ids: list[int]) -> list[int]:
-#     chosen_services: list[int] = [id for id in provided_service_ids if id in all_service_ids]
+# def selected_services_exist(provided_service_ids: list[int]) -> list[Service]:
+#     chosen_services: list[Service] = [service for service in services if service.service_id in provided_service_ids]
 #     if not chosen_services:
-#         print(f"none of the provided ids are valid, enter valid ids: ")
+#         print("none of the provided ids are valid, enter valid ids")
 #         prompt()
-#     non_existing_services: list[int] = [id for id in provided_service_ids if id not in all_service_ids]
-#     if non_existing_services:
-#         print(f"didn't find services with corresponding id's: {non_existing_services}")
-#     print(f"service ids you selected: {chosen_services}")
-#     print(f"+ {chosen_services}")
-#     print(f"- {non_existing_services}")
+#     non_existing_service_ids: list[int] = [id for id in provided_service_ids if id not in all_service_ids]
+#     if non_existing_service_ids:
+#         print(f"didn't find services with corresponding id's: {non_existing_service_ids}")
+#     print("services you selected:" + ", ".join([service.service_name for service in chosen_services]))
+#     # print(f"+ {chosen_services}")
+#     # print(f"- {non_existing_service_ids}")
 #     return chosen_services
 
-
 # prompt()
+
 
 class UserInput:
 
