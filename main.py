@@ -31,18 +31,17 @@ from docker_runtime import DockerRuntime
 #     config_key: str = ''
 # DB_QUESTIONS = [
 #     ServiceQuestion('What port should be open on host: ', True, 'published_port'),
-#     ServiceQuestion('What port should be open on container: ', True, 'target_port'),
 #     ServiceQuestion('Input db password: ', False, 'db_password')
 # ]
 # PROXY_QUESTIONS = [
 #     ServiceQuestion('What port should be open on host: ', True, 'published_port'),
-#     ServiceQuestion('What port should be open on container: ', True, 'target_port}'),
 # ]
 
 
 # @dataclass
 # class BaseServiceConfig:
-#     target_port: int = 0
+#     # network_mode is "host" as the services will probably need to talk to other services on users machine that I have no control over
+#     # target_port and published_port aren't specified for the host network
 #     published_port: int = 0
 # @dataclass
 # class DBConfig(BaseServiceConfig):
@@ -67,7 +66,7 @@ from docker_runtime import DockerRuntime
 #     postgres:
 #         image: postgres:latest
 #         ports:
-#             - "{port}"
+#             - "{published_port}"
 #         network_mode: host
 #         environment:
 #             POSTGRES_PASSWORD: "{db_password}"
@@ -76,7 +75,7 @@ from docker_runtime import DockerRuntime
 #     mysql:
 #         image: mysql:latest
 #         ports:
-#             - "{port}"
+#             - "{published_port}"
 #         network_mode: host
 #         environment:
 #             MYSQL_ROOT_PASSWORD: "{db_password}"
@@ -85,7 +84,7 @@ from docker_runtime import DockerRuntime
 #     redis:
 #         image: redis:latest
 #         ports:
-#             - "{port}"
+#             - "{published_port}"
 #         network_mode: host
 #         # environment:
 #             # NOT_REAL_PASSWORD_ENV: "{db_password}"
@@ -94,7 +93,7 @@ from docker_runtime import DockerRuntime
 #     nginx:
 #         image: nginx:latest
 #         ports:
-#             - "{port}"
+#             - "{published_port}"
 #         network_mode: host
 # """)
 # ]
@@ -160,7 +159,7 @@ from docker_runtime import DockerRuntime
 #             else:
 #                 setattr(service.service_config, question.config_key, answer)
 #                 break
-#     # print(service.service_config)
+    print(service.service_config)
 
 
 # selected_services: list[Service] = prompt()
