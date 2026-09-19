@@ -5,6 +5,7 @@ import subprocess
 from typing import Any
 from dataclasses import dataclass
 from enum import StrEnum
+from abc import ABC, abstractmethod
 from container_runtime import ContainerRuntime
 from docker_runtime import DockerRuntime
 
@@ -58,13 +59,44 @@ from docker_runtime import DockerRuntime
 #     service_type: ServiceType
 #     service_questions: list[ServiceQuestion]
 #     service_config: ServiceConfig
+#     service_compose: str
 
 
 # services: list[Service] = [
-#     Service(1, ServiceName.POSTGRES, ServiceType.DB, DB_QUESTIONS, DBConfig()),
-#     Service(2, ServiceName.MYSQL, ServiceType.DB, DB_QUESTIONS, DBConfig()),
-#     Service(3, ServiceName.REDIS, ServiceType.DB, DB_QUESTIONS, DBConfig()),
-#     Service(4, ServiceName.NGINX, ServiceType.PROXY, PROXY_QUESTIONS, ProxyConfig())
+#     Service(1, ServiceName.POSTGRES, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
+#     postgres:
+#         image: postgres:latest
+#         ports:
+#             - "{port}"
+#         network_mode: host
+#         environment:
+#             POSTGRES_PASSWORD: "{db_password}"
+# """),
+#     Service(2, ServiceName.MYSQL, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
+#     mysql:
+#         image: mysql:latest
+#         ports:
+#             - "{port}"
+#         network_mode: host
+#         environment:
+#             MYSQL_ROOT_PASSWORD: "{db_password}"
+# """),
+#     Service(3, ServiceName.REDIS, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
+#     redis:
+#         image: redis:latest
+#         ports:
+#             - "{port}"
+#         network_mode: host
+#         # environment:
+#             # NOT_REAL_PASSWORD_ENV: "{db_password}"
+# """),
+#     Service(4, ServiceName.NGINX, ServiceType.PROXY, PROXY_QUESTIONS, ProxyConfig(), """
+#     nginx:
+#         image: nginx:latest
+#         ports:
+#             - "{port}"
+#         network_mode: host
+# """)
 # ]
 
 
