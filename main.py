@@ -9,46 +9,46 @@ from container_runtime import ContainerRuntime
 from docker_runtime import DockerRuntime
 
 
-# class ServiceName(StrEnum):
-#     POSTGRES = 'postgres'
-#     MYSQL = 'mysql'
-#     REDIS = 'redis'
-#     NGINX = 'nginx'
+class ServiceName(StrEnum):
+    POSTGRES = 'postgres'
+    MYSQL = 'mysql'
+    REDIS = 'redis'
+    NGINX = 'nginx'
 
 
-# # gotta use it somehow
-#   # assign Service.service_questions based on its value
-# class ServiceType(StrEnum):
-#     DB = 'db'
-#     PROXY = 'proxy'
+# gotta use it somehow
+  # assign Service.service_questions based on its value
+class ServiceType(StrEnum):
+    DB = 'db'
+    PROXY = 'proxy'
 
 
-# @dataclass
-# class BaseServiceConfig:
-#     target_port: int = 0
-#     published_port: int = 0
-# @dataclass
-# class DBConfig(BaseServiceConfig):
-#     db_password: str = ''
-# @dataclass
-# class ProxyConfig(BaseServiceConfig):
-#     pass
+@dataclass
+class ServiceQuestion:
+    question: str = ''
+    must_be_int: bool = False
+    config_key: str = ''
+DB_QUESTIONS = [
+    ServiceQuestion('What port should be open on host: ', True, 'published_port'),
+    ServiceQuestion('What port should be open on container: ', True, 'target_port'),
+    ServiceQuestion('Input db password: ', False, 'db_password')
+]
+PROXY_QUESTIONS = [
+    ServiceQuestion('What port should be open on host: ', True, 'published_port'),
+    ServiceQuestion('What port should be open on container: ', True, 'target_port}'),
+]
 
 
-# @dataclass
-# class ServiceQuestion:
-#     question: str = ''
-#     must_be_int: bool = False
-#     config_key: str = ''
-# DB_QUESTIONS = [
-#     ServiceQuestion('What port should be open on host: ', True, f'{DBConfig().published_port}'),
-#     ServiceQuestion('What port should be open on container: ', True, f'{DBConfig().target_port}'),
-#     ServiceQuestion('Input db password: ', False, f'{DBConfig().db_password}')
-# ]
-# PROXY_QUESTIONS = [
-#     ServiceQuestion('What port should be open on host: ', True, f'{ProxyConfig().published_port}'),
-#     ServiceQuestion('What port should be open on container: ', True, f'{ProxyConfig().target_port}'),
-# ]
+@dataclass
+class BaseServiceConfig:
+    target_port: int = 0
+    published_port: int = 0
+@dataclass
+class DBConfig(BaseServiceConfig):
+    db_password: str = ''
+@dataclass
+class ProxyConfig(BaseServiceConfig):
+    pass
 
 
 # @dataclass
