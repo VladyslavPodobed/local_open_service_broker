@@ -1,11 +1,11 @@
 import re
 from dataclasses import dataclass
 from enum import StrEnum
-from docker_runtime import DockerRuntime
+# from docker_runtime import DockerRuntime
 
 
 COMPOSE_FILE = "./generated/docker_compose.yml"
-
+COMPOSE_NETWORK = "open_broker_network"
 
 class ServiceName(StrEnum):
     POSTGRES = 'postgres'
@@ -31,15 +31,14 @@ DB_QUESTIONS = [
     ServiceQuestion('Input db password: ', False, 'db_password')
 ]
 PROXY_QUESTIONS = [
-    ServiceQuestion('What port should be open on host: ', True, 'published_port'),
 ]
 
 
 @dataclass
 class BaseServiceConfig:
-    # network_mode is "host" as the services will probably need to talk to other services on users machine that I have no control over
-    # target_port and published_port aren't specified for the host network
+    # have a bridge network to allow for port mappings in case a service's default port is already taken on host
     published_port: int = 0
+    network:str = COMPOSE_NETWORK
 @dataclass
 class DBConfig(BaseServiceConfig):
     db_password: str = ''
@@ -63,35 +62,45 @@ services: list[Service] = [
     postgres:
         image: postgres:latest
         ports:
-            - "{published_port}"
-        network_mode: host
+            - target_port: 5432
+              published_port: {published_port}
         environment:
             POSTGRES_PASSWORD: "{db_password}"
+        networks:
+            - {network}:
 """),
     Service(2, ServiceName.MYSQL, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
     mysql:
         image: mysql:latest
         ports:
-            - "{published_port}"
-        network_mode: host
+            - target_port: 3306
+              published_port: {published_port}
         environment:
             MYSQL_ROOT_PASSWORD: "{db_password}"
+        networks:
+            - {network}:
 """),
     Service(3, ServiceName.REDIS, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
     redis:
         image: redis:latest
         ports:
-            - "{published_port}"
-        network_mode: host
+            - target_port: 6379
+              published_port: {published_port}
         # environment:
             # NOT_REAL_PASSWORD_ENV: "{db_password}"
+        networks:
+            - {network}:
 """),
     Service(4, ServiceName.NGINX, ServiceType.PROXY, PROXY_QUESTIONS, ProxyConfig(), """
     nginx:
         image: nginx:latest
         ports:
-            - "{published_port}"
-        network_mode: host
+            - target_port: 80
+              published_port: 80
+            - target_port: 443
+              published_port: 443
+        networks:
+            - {network}:
 """)
 ]
 
