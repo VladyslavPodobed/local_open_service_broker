@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 from enum import StrEnum
-# from docker_runtime import DockerRuntime
+from docker_runtime import DockerRuntime
 
 
 COMPOSE_FILE = "./generated/docker_compose.yml"
@@ -27,7 +27,7 @@ class ServiceQuestion:
     must_be_int: bool = False
     config_key: str = ''
 DB_QUESTIONS = [
-    ServiceQuestion('What port should be open on host: ', True, 'published_port'),
+    ServiceQuestion('What port should be open on host: ', True, 'published'),
     ServiceQuestion('Input db password: ', False, 'db_password')
 ]
 PROXY_QUESTIONS = [
@@ -37,7 +37,7 @@ PROXY_QUESTIONS = [
 @dataclass
 class BaseServiceConfig:
     # have a bridge network to allow for port mappings in case a service's default port is already taken on host
-    published_port: int = 0
+    published: int = 0
     network:str = COMPOSE_NETWORK
 @dataclass
 class DBConfig(BaseServiceConfig):
@@ -62,45 +62,45 @@ services: list[Service] = [
     postgres:
         image: postgres:latest
         ports:
-            - target_port: 5432
-              published_port: {published_port}
+            - target: 5432
+              published: {published}
         environment:
             POSTGRES_PASSWORD: "{db_password}"
         networks:
-            - {network}:
+            - {network}
 """),
     Service(2, ServiceName.MYSQL, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
     mysql:
         image: mysql:latest
         ports:
-            - target_port: 3306
-              published_port: {published_port}
+            - target: 3306
+              published: {published}
         environment:
             MYSQL_ROOT_PASSWORD: "{db_password}"
         networks:
-            - {network}:
+            - {network}
 """),
     Service(3, ServiceName.REDIS, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
     redis:
         image: redis:latest
         ports:
-            - target_port: 6379
-              published_port: {published_port}
+            - target: 6379
+              published: {published}
         # environment:
             # NOT_REAL_PASSWORD_ENV: "{db_password}"
         networks:
-            - {network}:
+            - {network}
 """),
     Service(4, ServiceName.NGINX, ServiceType.PROXY, PROXY_QUESTIONS, ProxyConfig(), """
     nginx:
         image: nginx:latest
         ports:
-            - target_port: 80
-              published_port: 80
-            - target_port: 443
-              published_port: 443
+            - target: 80
+              published: 80
+            - target: 443
+              published: 443
         networks:
-            - {network}:
+            - {network}
 """)
 ]
 
@@ -179,6 +179,16 @@ def compose_service_block(service: Service):
         config = service.service_config.__dict__.copy()
         compose_file.write(service.service_compose.format(**config))
 
+def compose_network_block():
+    with open(COMPOSE_FILE, "a") as compose_file:
+        compose_file.write(f"""
+networks:
+    {COMPOSE_NETWORK}:
+        driver: bridge""")
+
+
+runtime = DockerRuntime()
+
 
 if __name__ == "__main__":
     compose_service_keyword()
@@ -186,3 +196,5 @@ if __name__ == "__main__":
     for service in selected_services:
         ask(service)
         compose_service_block(service)
+    compose_network_block()
+    runtime.main()
