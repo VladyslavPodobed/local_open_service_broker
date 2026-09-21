@@ -5,8 +5,3 @@ datasources:
     access: server
     url: http://prometheus:9090
     isDefault: true
-
-  - name: postgres_exporter
-    type: postgres_exporter
-    access: server
-    url: http://prometheus_exporter:9187
