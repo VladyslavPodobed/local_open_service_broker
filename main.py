@@ -1,108 +1,15 @@
 import re
-from dataclasses import dataclass
-from enum import StrEnum
+import argparse
+from config import *
 from docker_runtime import DockerRuntime
+# from k3s_orchestration import K3sRuntime
 
 
-COMPOSE_FILE = "./generated/docker_compose.yml"
-COMPOSE_NETWORK = "open_broker_network"
-
-class ServiceName(StrEnum):
-    POSTGRES = 'postgres'
-    MYSQL = 'mysql'
-    REDIS = 'redis'
-    NGINX = 'nginx'
-
-
-# gotta use it somehow
-  # assign Service.service_questions based on its value
-class ServiceType(StrEnum):
-    DB = 'db'
-    PROXY = 'proxy'
-
-
-@dataclass
-class ServiceQuestion:
-    question: str = ''
-    must_be_int: bool = False
-    config_key: str = ''
-DB_QUESTIONS = [
-    ServiceQuestion('What port should be open on host: ', True, 'published'),
-    ServiceQuestion('Input db password: ', False, 'db_password')
-]
-PROXY_QUESTIONS = [
-]
-
-
-@dataclass
-class BaseServiceConfig:
-    # have a bridge network to allow for port mappings in case a service's default port is already taken on host
-    published: int = 0
-    network:str = COMPOSE_NETWORK
-@dataclass
-class DBConfig(BaseServiceConfig):
-    db_password: str = ''
-@dataclass
-class ProxyConfig(BaseServiceConfig):
-    pass
-
-
-@dataclass
-class Service[ServiceConfig: BaseServiceConfig]:
-    service_id: int
-    service_name: ServiceName
-    service_type: ServiceType
-    service_questions: list[ServiceQuestion]
-    service_config: ServiceConfig
-    service_compose: str
-
-
-services: list[Service] = [
-    Service(1, ServiceName.POSTGRES, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
-    postgres:
-        image: postgres:latest
-        ports:
-            - target: 5432
-              published: {published}
-        environment:
-            POSTGRES_PASSWORD: "{db_password}"
-        networks:
-            - {network}
-"""),
-    Service(2, ServiceName.MYSQL, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
-    mysql:
-        image: mysql:latest
-        ports:
-            - target: 3306
-              published: {published}
-        environment:
-            MYSQL_ROOT_PASSWORD: "{db_password}"
-        networks:
-            - {network}
-"""),
-    Service(3, ServiceName.REDIS, ServiceType.DB, DB_QUESTIONS, DBConfig(), """
-    redis:
-        image: redis:latest
-        ports:
-            - target: 6379
-              published: {published}
-        # environment:
-            # NOT_REAL_PASSWORD_ENV: "{db_password}"
-        networks:
-            - {network}
-"""),
-    Service(4, ServiceName.NGINX, ServiceType.PROXY, PROXY_QUESTIONS, ProxyConfig(), """
-    nginx:
-        image: nginx:latest
-        ports:
-            - target: 80
-              published: 80
-            - target: 443
-              published: 443
-        networks:
-            - {network}
-""")
-]
+parser = argparse.ArgumentParser()
+one_arg = parser.add_mutually_exclusive_group()
+one_arg.add_argument("-d", "--docker-compose", action="store_true")
+one_arg.add_argument("-k", "--k3s", action="store_true")
+cli_args = parser.parse_args()
 
 
 def create_initial_message():
@@ -114,6 +21,8 @@ e.g.
 if u need {services[0].service_name} - $: {services[0].service_id}
 if u need {services[0].service_name} {services[1].service_name} - $: {services[0].service_id} {services[1].service_id}"""
     return message
+
+
 print(create_initial_message())
 
 
@@ -123,11 +32,12 @@ def prompt() -> list[Service]:
     valid_services = selected_services_exist(extracted_ids)
     return valid_services
 
+
 def remove_non_numbers(provided_input) -> list[int]:
     try:
-        provided_input = re.sub('\.|\?|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\;|\:|\'|\"|\{|\}|\[|\|\<|\>|\`|\~|\\\|\/|\|', ',', provided_input)
-        provided_input = re.sub('[a-z]', '', provided_input)
-        provided_input = re.sub(',', ' ', provided_input).split()
+        provided_input = re.sub("\.|\?|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\;|\:|'|\"|\{|\}|\[|\|\<|\>|\`|\~|\\\|\/|\|", ",", provided_input)
+        provided_input = re.sub("[a-z]", "", provided_input)
+        provided_input = re.sub(",", " ", provided_input).split()
         provided_input = sorted(list(set(provided_input)))
         provided_input = [int(i) for i in provided_input if int(i)]
         if not provided_input:
@@ -138,7 +48,9 @@ def remove_non_numbers(provided_input) -> list[int]:
         prompt()
     return provided_input
 
+
 all_service_ids = [service.service_id for service in services if service.service_id]
+
 
 def selected_services_exist(provided_service_ids: list[int]) -> list[Service]:
     chosen_services: list[Service] = [service for service in services if service.service_id in provided_service_ids]
@@ -172,12 +84,14 @@ def compose_service_keyword():
     with open(COMPOSE_FILE, "w") as compose_file:
         compose_file.write("services:")
 
+
 def compose_service_block(service: Service):
     with open(COMPOSE_FILE, "a") as compose_file:
         # asdict is very slow - will use __dict__ instead
         # copy call to avoid mutation
         config = service.service_config.__dict__.copy()
         compose_file.write(service.service_compose.format(**config))
+
 
 def compose_network_block():
     with open(COMPOSE_FILE, "a") as compose_file:
@@ -187,14 +101,24 @@ networks:
         driver: bridge""")
 
 
-runtime = DockerRuntime()
+def determine_runtime_engine(cli_arg):
+    if cli_arg.docker_compose:
+        return DockerRuntime()
+    # return K3sRuntime()
 
 
-if __name__ == "__main__":
+def main():
+    runtime = determine_runtime_engine(cli_args)
+    DockerRuntime()
     compose_service_keyword()
     selected_services: list[Service] = prompt()
     for service in selected_services:
         ask(service)
         compose_service_block(service)
     compose_network_block()
-    runtime.main()
+    # runtime.main()
+    DockerRuntime().main()
+
+
+if __name__ == "__main__":
+    main()
