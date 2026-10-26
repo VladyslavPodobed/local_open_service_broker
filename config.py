@@ -2,9 +2,6 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 
-MANIFEST_FILE = "./generated/manifest.yml"
-
-
 COMPOSE_FILE = "./generated/docker_compose.yml"
 COMPOSE_NETWORK = "open_broker_network"
 
